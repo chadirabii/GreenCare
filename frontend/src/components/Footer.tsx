@@ -19,7 +19,8 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
-              AI-powered agriculture assistant for smarter farming. Empowering farmers with technology.
+              AI-powered agriculture assistant for smarter farming. Empowering
+              farmers with technology.
             </p>
           </div>
 
@@ -75,13 +76,13 @@ const Footer = () => {
               <li className="flex items-start space-x-2">
                 <Phone className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
                 <span className="text-sm text-muted-foreground">
-                  +1 (555) 123-4567
+                  +216 (21) 123-456
                 </span>
               </li>
               <li className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
                 <span className="text-sm text-muted-foreground">
-                  123 Farm Lane, Agriculture City
+                  123, Ariana, Tunisia
                 </span>
               </li>
             </ul>
