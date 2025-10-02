@@ -1,0 +1,17 @@
+{
+  "name": "GreenCare - AI Farm Assistant",
+  "short_name": "GreenCare",
+  "description": "AI-powered agriculture assistant for smarter farming",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#22c55e",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
+
