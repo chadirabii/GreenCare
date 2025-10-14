@@ -70,10 +70,7 @@ const Navbar = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/auth">
-              <Button
-                variant="outline"
-                className="transition-smooth hover:border-primary hover:text-primary"
-              >
+              <Button variant="outline" className="transition-smooth hover:border-primary hover:text-primary">
                 Sign In
               </Button>
             </Link>

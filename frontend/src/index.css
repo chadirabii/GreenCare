@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
 @layer base {
   :root {
     --background: 40 20% 97%;
@@ -15,7 +19,7 @@
 
     --primary: 142 70% 35%;
     --primary-foreground: 0 0% 100%;
-
+    
     --primary-light: 142 60% 55%;
     --primary-glow: 142 70% 65%;
 
@@ -36,29 +40,17 @@
     --ring: 142 70% 35%;
 
     --radius: 0.75rem;
-
+    
     /* Custom gradients */
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(142 70% 35%) 0%,
-      hsl(170 65% 40%) 100%
-    );
-    --gradient-soft: linear-gradient(
-      180deg,
-      hsl(142 40% 96%) 0%,
-      hsl(40 20% 97%) 100%
-    );
-    --gradient-radial: radial-gradient(
-      circle at 30% 20%,
-      hsl(142 50% 92%) 0%,
-      transparent 60%
-    );
-
+    --gradient-hero: linear-gradient(135deg, hsl(142 70% 35%) 0%, hsl(170 65% 40%) 100%);
+    --gradient-soft: linear-gradient(180deg, hsl(142 40% 96%) 0%, hsl(40 20% 97%) 100%);
+    --gradient-radial: radial-gradient(circle at 30% 20%, hsl(142 50% 92%) 0%, transparent 60%);
+    
     /* Shadows */
     --shadow-soft: 0 2px 12px -2px hsl(142 70% 35% / 0.08);
     --shadow-medium: 0 8px 24px -4px hsl(142 70% 35% / 0.12);
     --shadow-glow: 0 0 40px hsl(142 70% 65% / 0.25);
-
+    
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -75,7 +67,7 @@
 
     --primary: 142 70% 45%;
     --primary-foreground: 0 0% 100%;
-
+    
     --primary-light: 142 60% 60%;
     --primary-glow: 142 70% 70%;
 
@@ -105,13 +97,8 @@
   body {
     @apply bg-background text-foreground font-inter antialiased;
   }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  
+  h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
   }
 }
@@ -120,27 +107,27 @@
   .gradient-hero {
     background: var(--gradient-hero);
   }
-
+  
   .gradient-soft {
     background: var(--gradient-soft);
   }
-
+  
   .gradient-radial {
     background: var(--gradient-radial);
   }
-
+  
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
-
+  
   .shadow-medium {
     box-shadow: var(--shadow-medium);
   }
-
+  
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-
+  
   .transition-smooth {
     transition: var(--transition-smooth);
   }
