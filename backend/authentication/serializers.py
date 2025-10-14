@@ -2,9 +2,11 @@ from rest_framework import serializers
 
 from authentication.models import CustomUser
 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
 
 class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField()
@@ -16,4 +18,3 @@ class RegisterSerializer(serializers.Serializer):
         choices=['farmer', 'house_plant_owner'],
         default='house_plant_owner'
     )
-    
