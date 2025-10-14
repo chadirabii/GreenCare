@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'authentication',
+    'plants',
 ]
 
 SWAGGER_SETTINGS = {
@@ -136,10 +137,10 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 # To avoid any type of error
 # ================
 STATIC_URL = '/static/'
-STATIC_ROOT= os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIR = {
     os.path.join(BASE_DIR, 'public/static')
 }
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public/static')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # ================
