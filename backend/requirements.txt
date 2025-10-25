@@ -6,3 +6,4 @@ Pillow
 django-bootstrap4
 djangorestframework
 drf-yasg
+requests==2.31.0

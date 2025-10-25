@@ -25,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/plants/', include('plants.urls')),
+    path('api/watering/', include('plant_watering.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
