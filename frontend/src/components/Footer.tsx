@@ -76,13 +76,13 @@ const Footer = () => {
               <li className="flex items-start space-x-2">
                 <Phone className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
                 <span className="text-sm text-muted-foreground">
-                  +216 (21) 123-456
+                  +1 (555) 123-4567
                 </span>
               </li>
               <li className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
                 <span className="text-sm text-muted-foreground">
-                  123, Ariana, Tunisia
+                  123 Farm Lane, Agriculture City
                 </span>
               </li>
             </ul>
