@@ -12,6 +12,10 @@ import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Plants from "./pages/Plants";
+import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
+import MyProducts from "./pages/MyProducts";
+import MySales from "./pages/MySales";
 import CropHistory from "./pages/CropHistory";
 import Irrigation from "./pages/Irrigation";
 import DiseaseDetection from "./pages/DiseaseDetection";
@@ -45,6 +49,10 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/plants" element={<ProtectedRoute><Plants /></ProtectedRoute>} />
+            <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+            <Route path="/products/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+            <Route path="/my-products" element={<ProtectedRoute><MyProducts /></ProtectedRoute>} />
+            <Route path="/my-sales" element={<ProtectedRoute><MySales /></ProtectedRoute>} />
             <Route path="/crop-history" element={<ProtectedRoute><CropHistory /></ProtectedRoute>} />
             <Route path="/irrigation" element={<ProtectedRoute><Irrigation /></ProtectedRoute>} />
             <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
