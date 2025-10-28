@@ -2,13 +2,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from authentication.models import CustomUser
-from authentication.serializers import LoginSerializer, RegisterSerializer
+from authentication.serializers import *
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# Create your views here.
+
 
 @swagger_auto_schema(request_body=LoginSerializer, method='post')
 @api_view(['POST'])
@@ -31,9 +32,22 @@ def login_view(request):
         if user is None:
             return Response({'error': 'Invalid credentials'}, status=400)
 
-        login(request, user)
-        return Response({'message': 'Login successful', 'username': user.username})
+        # Create JWT token
+        refresh = RefreshToken.for_user(user)
 
+        return Response({
+            'message': 'Login successful',
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),  
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        }, status=status.HTTP_200_OK)
+        
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -54,22 +68,35 @@ def register_view(request):
         user = CustomUser.objects.create_user(
             first_name = data['first_name'],
             last_name = data['last_name'],
-            username=data['username'],
-            profile_picture=data.get('profile_picture')
+            username = data['username'],
+            profile_picture = data.get('profile_picture'),
+            role = data.get('role', 'plant_owner')
         )
         user.set_password(data['password'])
 
-        role = data.get('role', 'house_plant_owner')  # gets role from request
-        group = Group.objects.get_or_create(name=role)[0]
-        user.groups.add(group)
-        
         user.save()
+        
+        # Create token
+        refresh = RefreshToken.for_user(user)
     
-        return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
+        return Response({
+            'message': 'Account created successfully!',
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        }, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def logout_view(request):
-    logout(request)
-    return Response({'message': 'Logged out successfully'})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def get_current_user(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
