@@ -4,14 +4,14 @@ from authentication.models import CustomUser
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.EmailField() 
     password = serializers.CharField(write_only=True)   
 
 
 class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
-    username = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     profile_picture = serializers.ImageField(required=False)
     
@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         
         # Fields returned in API responses
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'profile_picture', 'created_at']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'profile_picture', 'created_at']
         
         # FIelds that can't be changed through the API
         read_only_fields = ['id', 'created_at']
