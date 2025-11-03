@@ -16,8 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Product } from "@/pages/Products";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { uploadProductImage } from "@/services/productService";
+import { useToast } from "@/hooks/use-toast";
+
+interface Product {
+  id?: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+}
 
 interface ProductFormProps {
   open: boolean;
@@ -34,18 +44,18 @@ export const ProductForm = ({
   onSubmit,
   product,
 }: ProductFormProps) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<Product>({
-    id: "",
     name: "",
     description: "",
     price: 0,
     category: "plants",
-    image: "/placeholder.svg",
-    ownerId: "",
-    ownerName: "",
+    image: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imagePreview, setImagePreview] = useState<string>("/placeholder.svg");
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (product) {
@@ -53,28 +63,25 @@ export const ProductForm = ({
       setImagePreview(product.image);
     } else {
       setFormData({
-        id: "",
         name: "",
         description: "",
         price: 0,
         category: "plants",
-        image: "/placeholder.svg",
-        ownerId: "",
-        ownerName: "",
+        image: "",
       });
-      setImagePreview("/placeholder.svg");
+      setImagePreview("");
+      setSelectedFile(null);
     }
     setErrors({});
   }, [product, open]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-        setFormData({ ...formData, image: result });
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -99,14 +106,54 @@ export const ProductForm = ({
       newErrors.category = "Category is required";
     }
 
+    if (!product && !selectedFile && !formData.image) {
+      newErrors.image = "Product image is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      onSubmit(formData);
+
+    if (!validate()) {
+      return;
+    }
+
+    try {
+      setUploading(true);
+      let imageUrl = formData.image;
+
+      // Upload image to Cloudinary if a new file is selected
+      if (selectedFile) {
+        try {
+          imageUrl = await uploadProductImage(selectedFile);
+        } catch (error) {
+          toast({
+            title: "Image upload failed",
+            description: "Failed to upload image. Please try again.",
+            variant: "destructive",
+          });
+          setUploading(false);
+          return;
+        }
+      }
+
+      const productData = {
+        ...formData,
+        image: imageUrl,
+      };
+
+      onSubmit(productData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -124,11 +171,17 @@ export const ProductForm = ({
             <Label htmlFor="image">Product Image</Label>
             <div className="flex items-center gap-4">
               <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted border-2 border-dashed">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    No image
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <Label
@@ -151,12 +204,17 @@ export const ProductForm = ({
                   id="image-upload"
                   type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
+                  onChange={handleImageSelect}
                   className="hidden"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   Recommended: Square image, at least 500x500px
                 </p>
+                {errors.image && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.image}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -244,11 +302,21 @@ export const ProductForm = ({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={uploading}
             >
               Cancel
             </Button>
-            <Button type="submit">
-              {product ? "Update Product" : "Add Product"}
+            <Button type="submit" disabled={uploading}>
+              {uploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {selectedFile ? "Uploading..." : "Saving..."}
+                </>
+              ) : product ? (
+                "Update Product"
+              ) : (
+                "Add Product"
+              )}
             </Button>
           </div>
         </form>

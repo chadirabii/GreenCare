@@ -8,112 +8,124 @@ import { ProductForm } from "@/components/ProductForm";
 import { DeleteProductDialog } from "@/components/DeleteProductDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Product } from "./Products";
+import {
+  getMyProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  type Product as ProductType,
+} from "@/services/productService";
+
+interface Product {
+  id?: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+}
 
 const MyProducts = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [myProducts, setMyProducts] = useState<Product[]>([]);
+  const [myProducts, setMyProducts] = useState<ProductType[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
-  const [deletingProduct, setDeletingProduct] = useState<Product | undefined>();
+  const [deletingProduct, setDeletingProduct] = useState<
+    ProductType | undefined
+  >();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
 
-  useEffect(() => {
-    const storedProducts = localStorage.getItem("greencare_products");
-    if (storedProducts) {
-      const allProducts: Product[] = JSON.parse(storedProducts);
-      setProducts(allProducts);
-      const userProducts = allProducts.filter((p) => p.ownerId === user?.email);
-      setMyProducts(userProducts);
+  const fetchMyProducts = async () => {
+    try {
+      setLoading(true);
+      const products = await getMyProducts();
+      setMyProducts(products);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load your products",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [user?.email]);
+  };
+
+  useEffect(() => {
+    fetchMyProducts();
+  }, []);
 
   const handleAddProduct = () => {
     setEditingProduct(undefined);
     setIsFormOpen(true);
   };
 
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
+  const handleEditProduct = (product: ProductType) => {
+    setEditingProduct({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      image: product.image,
+    });
     setIsFormOpen(true);
   };
 
-  const handleDeleteClick = (product: Product) => {
+  const handleDeleteClick = (product: ProductType) => {
     setDeletingProduct(product);
     setIsDeleteOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deletingProduct) return;
 
-    const updatedProducts = products.filter((p) => p.id !== deletingProduct.id);
-    setProducts(updatedProducts);
-    localStorage.setItem("greencare_products", JSON.stringify(updatedProducts));
-
-    const userProducts = updatedProducts.filter(
-      (p) => p.ownerId === user?.email
-    );
-    setMyProducts(userProducts);
-
-    toast({
-      title: "Product deleted",
-      description: "Your product has been removed successfully.",
-    });
-
-    setIsDeleteOpen(false);
-    setDeletingProduct(undefined);
+    try {
+      await deleteProduct(deletingProduct.id);
+      await fetchMyProducts();
+      toast({
+        title: "Product deleted",
+        description: "Your product has been removed successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteOpen(false);
+      setDeletingProduct(undefined);
+    }
   };
 
-  const handleFormSubmit = (product: Product) => {
-    if (editingProduct) {
-      const updatedProducts = products.map((p) =>
-        p.id === product.id ? product : p
-      );
-      setProducts(updatedProducts);
-      localStorage.setItem(
-        "greencare_products",
-        JSON.stringify(updatedProducts)
-      );
-
-      const userProducts = updatedProducts.filter(
-        (p) => p.ownerId === user?.email
-      );
-      setMyProducts(userProducts);
-
+  const handleFormSubmit = async (product: Product) => {
+    try {
+      if (editingProduct?.id) {
+        await updateProduct(editingProduct.id, product);
+        toast({
+          title: "Product updated",
+          description: "Your product has been updated successfully.",
+        });
+      } else {
+        await createProduct(product);
+        toast({
+          title: "Product added",
+          description: "Your product has been added successfully.",
+        });
+      }
+      await fetchMyProducts();
+      setIsFormOpen(false);
+    } catch (error) {
       toast({
-        title: "Product updated",
-        description: "Your product has been updated successfully.",
-      });
-    } else {
-      const newProduct = {
-        ...product,
-        id: Date.now().toString(),
-        ownerId: user?.email || "unknown",
-        ownerName: user?.name || "Unknown Seller",
-      };
-      const updatedProducts = [...products, newProduct];
-      setProducts(updatedProducts);
-      localStorage.setItem(
-        "greencare_products",
-        JSON.stringify(updatedProducts)
-      );
-
-      const userProducts = updatedProducts.filter(
-        (p) => p.ownerId === user?.email
-      );
-      setMyProducts(userProducts);
-
-      toast({
-        title: "Product added",
-        description: "Your product has been added successfully.",
+        title: "Error",
+        description: "Failed to save product",
+        variant: "destructive",
       });
     }
-    setIsFormOpen(false);
   };
 
   return (

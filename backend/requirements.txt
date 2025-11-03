@@ -6,5 +6,9 @@ Pillow
 django-bootstrap4
 djangorestframework
 drf-yasg
+cloudinary
+django-cloudinary-storage
+django-cors-headers
+python-dotenv
 requests==2.31.0
 djangorestframework-simplejwt
