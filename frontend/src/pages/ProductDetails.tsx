@@ -1,14 +1,18 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { AppLayout } from '@/components/AppLayout';
-import { Button } from '@/components/ui/button';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
-import { Product } from './Products';
-import { ProductForm } from '@/components/ProductForm';
-import { DeleteProductDialog } from '@/components/DeleteProductDialog';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { AppLayout } from "@/components/AppLayout";
+import { Button } from "@/components/ui/button";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ProductForm } from "@/components/ProductForm";
+import { DeleteProductDialog } from "@/components/DeleteProductDialog";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  getProduct,
+  deleteProduct,
+  type Product,
+} from "@/services/productService";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,62 +20,71 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const isOwner = product?.ownerId === user?.email;
+  const isOwner = product?.owner === user?.id;
 
   useEffect(() => {
-    const storedProducts = localStorage.getItem('greencare_products');
-    if (storedProducts) {
-      const products: Product[] = JSON.parse(storedProducts);
-      const foundProduct = products.find((p) => p.id === id);
-      if (foundProduct) {
-        setProduct(foundProduct);
-      } else {
-        navigate('/products');
+    const fetchProductDetails = async () => {
+      if (!id) {
+        navigate("/products");
+        return;
       }
-    }
-  }, [id, navigate]);
 
-  const handleDeleteConfirm = () => {
+      try {
+        setLoading(true);
+        const data = await getProduct(id);
+        setProduct(data);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load product details",
+          variant: "destructive",
+        });
+        navigate("/products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [id, navigate, toast]);
+
+  const handleDeleteConfirm = async () => {
     if (!product) return;
 
-    const storedProducts = localStorage.getItem('greencare_products');
-    if (storedProducts) {
-      const products: Product[] = JSON.parse(storedProducts);
-      const updatedProducts = products.filter((p) => p.id !== product.id);
-      localStorage.setItem('greencare_products', JSON.stringify(updatedProducts));
+    try {
+      await deleteProduct(product.id);
 
       toast({
-        title: 'Product deleted',
-        description: 'The product has been removed successfully.',
+        title: "Product deleted",
+        description: "The product has been removed successfully.",
       });
 
-      navigate('/products');
+      navigate("/products");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleFormSubmit = (updatedProduct: Product) => {
-    const storedProducts = localStorage.getItem('greencare_products');
-    if (storedProducts) {
-      const products: Product[] = JSON.parse(storedProducts);
-      const updatedProducts = products.map((p) =>
-        p.id === updatedProduct.id ? updatedProduct : p
-      );
-      localStorage.setItem('greencare_products', JSON.stringify(updatedProducts));
-      setProduct(updatedProduct);
+  const handleFormSubmit = async (updatedProduct: Product) => {
+    setProduct(updatedProduct);
 
-      toast({
-        title: 'Product updated',
-        description: 'The product has been updated successfully.',
-      });
+    toast({
+      title: "Product updated",
+      description: "The product has been updated successfully.",
+    });
 
-      setIsFormOpen(false);
-    }
+    setIsFormOpen(false);
   };
 
-  if (!product) {
+  if (loading || !product) {
     return (
       <AppLayout>
         <div className="text-center py-12">
@@ -90,13 +103,21 @@ const ProductDetails = () => {
         className="space-y-6"
       >
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate('/products')} className="gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/products")}
+            className="gap-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to Products
           </Button>
           {isOwner && (
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setIsFormOpen(true)} className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsFormOpen(true)}
+                className="gap-2"
+              >
                 <Pencil className="h-4 w-4" />
                 Edit
               </Button>
@@ -136,13 +157,19 @@ const ProductDetails = () => {
               <span className="inline-block text-xs px-3 py-1 rounded-full bg-primary/10 text-primary mb-4">
                 {product.category}
               </span>
-              <h1 className="text-4xl font-bold text-foreground mb-2">{product.name}</h1>
-              <p className="text-3xl font-bold text-primary">${product.price}</p>
+              <h1 className="text-4xl font-bold text-foreground mb-2">
+                {product.name}
+              </h1>
+              <p className="text-3xl font-bold text-primary">
+                ${product.price}
+              </p>
             </div>
 
             <div className="border-t pt-6">
               <h2 className="text-lg font-semibold mb-3">Description</h2>
-              <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {product.description}
+              </p>
             </div>
 
             <div className="border-t pt-6">
@@ -154,7 +181,7 @@ const ProductDetails = () => {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Seller:</dt>
-                  <dd className="font-medium">{product.ownerName}</dd>
+                  <dd className="font-medium">{product.owner_name}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Product ID:</dt>
