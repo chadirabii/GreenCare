@@ -4,52 +4,58 @@ from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from authentication.models import CustomUser
-from authentication.serializers import LoginSerializer, RegisterSerializer
+from authentication.serializers import *
 from drf_yasg.utils import swagger_auto_schema
-
-# Create your views here.
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-@ensure_csrf_cookie
-def get_csrf_token(request):
-    """Get CSRF token for the client"""
-    return Response({'detail': 'CSRF cookie set'})
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
-@swagger_auto_schema(request_body=LoginSerializer, method='post')
-@api_view(['POST'])
+@swagger_auto_schema(request_body=LoginSerializer, method="post")
+@api_view(["POST"])
 @permission_classes([AllowAny])
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
 
     if serializer.is_valid():
-        username = serializer.validated_data['username']
-        password = serializer.validated_data['password']
-        user = authenticate(request, username=username, password=password)
+        email = serializer.validated_data['email']
+        password = serializer.validated_data["password"]
 
         # check if user exists
-        if not CustomUser.objects.filter(username=username).exists():
-            return Response({'error': 'Invalid credentials'}, status=400)
+        if not CustomUser.objects.filter(email=email).exists():
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
         # authenticate
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=email, password=password)
 
         if user is None:
-            return Response({'error': 'Invalid credentials'}, status=400)
+            return Response({"error": "Invalid credentials"}, status=400)
 
-        login(request, user)
-        return Response({'message': 'Login successful', 'username': user.username})
+        # Create JWT token
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "message": "Login successful",
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(request_body=RegisterSerializer, method='post')
-@api_view(['POST'])
+@swagger_auto_schema(request_body=RegisterSerializer, method="post")
+@api_view(["POST"])
 @permission_classes([AllowAny])
 def register_view(request):
     serializer = RegisterSerializer(data=request.data)
@@ -58,29 +64,44 @@ def register_view(request):
         data = serializer.validated_data
 
         # check if user exists
-        if CustomUser.objects.filter(username=data['username']).exists():
-            return Response({'error': 'Username already taken!'}, status=status.HTTP_400_BAD_REQUEST)
-
+        if CustomUser.objects.filter(email=data['email']).exists():
+            return Response({'error': 'Email already registered!'}, status=status.HTTP_400_BAD_REQUEST)
+    
         user = CustomUser.objects.create_user(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            username=data['username'],
-            profile_picture=data.get('profile_picture')
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            email=data['email'],
+            profile_picture=data.get("profile_picture"),
+            role=data.get("role", "plant_owner"),
         )
-        user.set_password(data['password'])
-
-        role = data.get('role', 'house_plant_owner')  # gets role from request
-        group = Group.objects.get_or_create(name=role)[0]
-        user.groups.add(group)
+        user.set_password(data["password"])
 
         user.save()
 
-        return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
+        # Create token
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "message": "Account created successfully!",
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-def logout_view(request):
-    logout(request)
-    return Response({'message': 'Logged out successfully'})
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data, status=status.HTTP_200_OK)

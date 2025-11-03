@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/plants/', include('plants.urls')),
     path('api/products/', include('products.urls')),
+    path('api/watering/', include('plant_watering.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

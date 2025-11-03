@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +32,11 @@ SECRET_KEY = 'django-insecure-_v0e9(m4dg-z(w-u9h_038^d1tmbu82+^_!m+azhzxgt3y*0yy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'testserver',
+]
 
 
 # Application definition
@@ -45,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap4',
     'rest_framework',
+    'rest_framework_simplejwt',
     'drf_yasg',
     'corsheaders',
     'cloudinary_storage',
@@ -52,7 +58,15 @@ INSTALLED_APPS = [
     'authentication',
     'plants',
     'products',
+    'plant_watering.apps.PlantWateringConfig',
 ]
+
+# Use JWT authentication
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT tokens
+    ],
+}
 
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': True,
@@ -140,6 +154,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
+# ===============================
+
+
 # Auth user
 AUTH_USER_MODEL = 'authentication.CustomUser'
 
@@ -152,6 +171,23 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 }
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    
+    'ROTATE_REFRESH_TOKENS': True,  # Create new refresh token when refreshing
+    'ALGORITHM': 'HS256',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+
+    # Where to find the user ID in the token
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+
+
 
 
 # To avoid any type of error
