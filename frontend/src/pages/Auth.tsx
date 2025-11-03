@@ -48,14 +48,14 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="fixed inset-0 flex overflow-hidden">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-8 bg-background min-h-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md min-h-0"
         >
           {/* Back to Home Link */}
           <Link
@@ -280,7 +280,7 @@ const Auth = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden"
+        className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden min-h-0"
       >
         <img
           src={authBg}
@@ -290,9 +290,7 @@ const Auth = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary-light/80" />
         <div className="absolute inset-0 flex items-center justify-center p-12">
           <div className="max-w-md text-center text-white">
-            <h2 className="text-4xl font-bold mb-6">
-              Join 10,000+ Farmers
-            </h2>
+            <h2 className="text-4xl font-bold mb-6">Join 10,000+ Farmers</h2>
             <p className="text-xl text-white/90 leading-relaxed">
               Transform your farming with AI-powered insights and real-time
               monitoring. Start your journey to smarter agriculture today.
