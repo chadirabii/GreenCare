@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Plants
 from .serializers import PlantSerializer
-
 from plant_watering.serializers import PlantWateringSerializer
 
 
@@ -13,7 +12,8 @@ class PlantViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def watering_record(self, request, pk=None):
-        """Return watering records for this plant.
+        """
+        Return watering records for this plant.
 
         URL: GET /api/plants/{pk}/watering_record/
         Returns watering records ordered by date (newest first).

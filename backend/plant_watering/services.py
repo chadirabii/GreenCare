@@ -4,15 +4,18 @@ from django.conf import settings
 
 class WeatherService:
     BASE_URL = "https://api.open-meteo.com/v1/forecast"
+    # Default location set to Tunisia, Tunis
+    DEFAULT_LATITUDE = 36.8065
+    DEFAULT_LONGITUDE = 10.1815
     
     @staticmethod
-    def get_weather_forecast(latitude, longitude):
+    def get_weather_forecast():
         """
-        Get weather forecast from Open-Meteo API
+        Get weather forecast from Open-Meteo API using default location
         """
         params = {
-            'latitude': latitude,
-            'longitude': longitude,
+            'latitude': WeatherService.DEFAULT_LATITUDE,
+            'longitude': WeatherService.DEFAULT_LONGITUDE,
             'daily': ['precipitation_sum', 'temperature_2m_max'],
             'timezone': 'auto',
             'forecast_days': 7
@@ -33,28 +36,30 @@ class WeatherService:
             return None
 
     @staticmethod
-    def should_water_plant(plant, weather_data):
+    def calculate_next_watering(current_date=None):
         """
-        Determine if a plant should be watered based on weather conditions
+        Calculate next watering date based on weather forecast
         """
+        weather_data = WeatherService.get_weather_forecast()
         if not weather_data:
-            return True  # If we can't get weather data, default to regular watering
+            # If weather data unavailable, default to 3 days
+            return (current_date or datetime.now()) + timedelta(days=3)
+
+        next_date = current_date or datetime.now()
+        days_to_add = 3  # Default interval
+
+        # Check next 7 days
+        for i in range(7):
+            precip = weather_data['precipitation'][i]
+            temp = weather_data['temperature_max'][i]
             
-        # Get today's forecast
-        today_precip = weather_data['precipitation'][0]
-        today_temp = weather_data['temperature_max'][0]
-        
-        # Basic logic - adjust these thresholds based on your needs
-        if today_precip > 5.0:  # More than 5mm rain expected
-            return False
-        
-        if today_temp > 30:  # If it's very hot
-            return True
-            
-        # Check if it's time for regular watering
-        last_watering = plant.watering_schedules.filter(is_completed=True).order_by('-watering_date').first()
-        if not last_watering:
-            return True
-            
-        days_since_watering = (datetime.now().date() - last_watering.watering_date.date()).days
-        return days_since_watering >= plant.watering_interval_days
+            # Adjust watering schedule based on weather conditions
+            if precip > 5.0:  # If significant rain is expected
+                days_to_add = i + 2  # Skip rainy day and add one more
+                break
+            elif temp > 30:  # Hot weather
+                days_to_add = 2  # Water more frequently
+            elif temp < 20:  # Cool weather
+                days_to_add = 4  # Water less frequently
+
+        return next_date + timedelta(days=days_to_add)
