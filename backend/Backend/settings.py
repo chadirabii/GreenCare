@@ -27,7 +27,11 @@ SECRET_KEY = 'django-insecure-_v0e9(m4dg-z(w-u9h_038^d1tmbu82+^_!m+azhzxgt3y*0yy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'testserver',
+]
 
 
 # Application definition
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'authentication',
     'plants',
+    'plant_watering.apps.PlantWateringConfig',
 ]
 
 # Use JWT authentication
