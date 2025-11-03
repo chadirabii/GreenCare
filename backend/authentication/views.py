@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -9,6 +11,15 @@ from authentication.serializers import LoginSerializer, RegisterSerializer
 from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    """Get CSRF token for the client"""
+    return Response({'detail': 'CSRF cookie set'})
+
 
 @swagger_auto_schema(request_body=LoginSerializer, method='post')
 @api_view(['POST'])
@@ -22,11 +33,11 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         # check if user exists
-        if not CustomUser.objects.filter(username = username).exists():
+        if not CustomUser.objects.filter(username=username).exists():
             return Response({'error': 'Invalid credentials'}, status=400)
 
         # authenticate
-        user = authenticate(username = username, password = password)
+        user = authenticate(username=username, password=password)
 
         if user is None:
             return Response({'error': 'Invalid credentials'}, status=400)
@@ -37,7 +48,6 @@ def login_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @swagger_auto_schema(request_body=RegisterSerializer, method='post')
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -46,14 +56,14 @@ def register_view(request):
 
     if serializer.is_valid():
         data = serializer.validated_data
-    
+
         # check if user exists
         if CustomUser.objects.filter(username=data['username']).exists():
             return Response({'error': 'Username already taken!'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         user = CustomUser.objects.create_user(
-            first_name = data['first_name'],
-            last_name = data['last_name'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
             username=data['username'],
             profile_picture=data.get('profile_picture')
         )
@@ -62,12 +72,13 @@ def register_view(request):
         role = data.get('role', 'house_plant_owner')  # gets role from request
         group = Group.objects.get_or_create(name=role)[0]
         user.groups.add(group)
-        
+
         user.save()
-    
+
         return Response({'message': 'Account created successfully!'}, status=status.HTTP_201_CREATED)
-    
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def logout_view(request):
