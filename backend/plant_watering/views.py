@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from datetime import datetime
 from .models import PlantWatering
 from .serializers import PlantWateringSerializer
 from rest_framework.decorators import action
@@ -8,32 +9,44 @@ from .services import WeatherService
 class PlantWateringViewSet(viewsets.ModelViewSet):
     queryset = PlantWatering.objects.all()
     serializer_class = PlantWateringSerializer
-    
+
+    def create(self, request, *args, **kwargs):
+        # Get the data from the request
+        data = request.data.copy()
+        
+        # If watering_date is not provided, use current time
+        if 'watering_date' not in data:
+            data['watering_date'] = datetime.now().isoformat()
+
+        # Calculate next watering date based on weather
+        watering_date = datetime.fromisoformat(data['watering_date'].replace('Z', '+00:00'))
+        next_watering = WeatherService.calculate_next_watering(watering_date)
+        data['next_watering_date'] = next_watering.isoformat()
+
+        # Create serializer with the modified data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(detail=False, methods=['GET'])
     def weather_forecast(self, request):
         """
         Get weather forecast and watering recommendations
-        GET /api/plant-watering/weather_forecast/?latitude=36.8065&longitude=10.1815
+        GET /api/plant-watering/weather_forecast/
         """
-        latitude = request.query_params.get('latitude')
-        longitude = request.query_params.get('longitude')
-        
-        if not latitude or not longitude:
+        weather_data = WeatherService.get_weather_forecast()
+        if weather_data is None:
             return Response(
-                {"error": "Latitude and longitude are required"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Failed to fetch weather data"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
             
-        try:
-            latitude = float(latitude)
-            longitude = float(longitude)
-        except ValueError:
-            return Response(
-                {"error": "Invalid latitude or longitude format"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        weather_data = WeatherService.get_weather_forecast(latitude, longitude)
+        # Add watering recommendation
+        next_watering = WeatherService.calculate_next_watering()
+        weather_data['next_recommended_watering'] = next_watering.strftime('%Y-%m-%d')
         
         if weather_data is None:
             return Response(
