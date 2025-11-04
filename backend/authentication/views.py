@@ -1,7 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -66,7 +64,7 @@ def register_view(request):
         # check if user exists
         if CustomUser.objects.filter(email=data['email']).exists():
             return Response({'error': 'Email already registered!'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         user = CustomUser.objects.create_user(
             first_name=data["first_name"],
             last_name=data["last_name"],
@@ -98,6 +96,23 @@ def register_view(request):
         )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    """
+    Logout user by invalidating the refresh token
+    """
+    try:
+        refresh_token = request.data.get("refresh_token")
+        if refresh_token:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        logout(request)
+        return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
