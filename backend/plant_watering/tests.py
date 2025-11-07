@@ -12,7 +12,6 @@ class PlantWateringTests(APITestCase):
     def setUp(self):
         # Create a test user
         self.user = CustomUser.objects.create_user(
-            username='testuser',
             email='test@example.com',
             password='testpass123'
         )

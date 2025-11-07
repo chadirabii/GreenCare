@@ -14,7 +14,7 @@ class PlantWateringEndpointTests(APITestCase):
         # Create a test user
         import uuid
         self.user = CustomUser.objects.create_user(
-            username=f'testuser_endpoint_{uuid.uuid4().hex[:8]}',
+            email=f'testuser_{uuid.uuid4().hex[:8]}@example.com',
             password='testpass123'
         )
         # Create a test plant
@@ -48,7 +48,7 @@ class PlantWateringEndpointTests(APITestCase):
     def test_get_plant_watering_records(self):
         """Test getting watering records for a specific plant."""
         # Get the URL for the plant's watering records
-        url = reverse('plant-watering_record', kwargs={'pk': self.plant.pk})
+        url = reverse('plant-watering-record', kwargs={'pk': self.plant.pk})
         
         # Make the request
         response = self.client.get(url)
