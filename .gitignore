@@ -22,3 +22,8 @@ backend/venv/
 
 # VSCode
 .vscode/
+
+# Tests
+**/tests/
+
+
