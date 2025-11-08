@@ -6,17 +6,23 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { initializeCSRF } from "@/services/api";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Plants from "./pages/Plants";
+import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
+import MyProducts from "./pages/MyProducts";
+import MySales from "./pages/MySales";
 import CropHistory from "./pages/CropHistory";
 import Irrigation from "./pages/Irrigation";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Watering from "./pages/Watering";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -30,6 +36,115 @@ const ScrollToTop = () => {
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  useEffect(() => {
+    // Initialize CSRF token when app loads
+    initializeCSRF();
+  }, []);
+
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plants"
+          element={
+            <ProtectedRoute>
+              <Plants />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/watering"
+          element={
+            <ProtectedRoute>
+              <Watering />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products/:id"
+          element={
+            <ProtectedRoute>
+              <ProductDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-products"
+          element={
+            <ProtectedRoute>
+              <MyProducts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-sales"
+          element={
+            <ProtectedRoute>
+              <MySales />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crop-history"
+          element={
+            <ProtectedRoute>
+              <CropHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/irrigation"
+          element={
+            <ProtectedRoute>
+              <Irrigation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/disease-detection"
+          element={
+            <ProtectedRoute>
+              <DiseaseDetection />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -37,21 +152,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/plants" element={<ProtectedRoute><Plants /></ProtectedRoute>} />
-            <Route path="/crop-history" element={<ProtectedRoute><CropHistory /></ProtectedRoute>} />
-            <Route path="/irrigation" element={<ProtectedRoute><Irrigation /></ProtectedRoute>} />
-            <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppContent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -10,6 +10,11 @@
 
 # Virtual environment
 backend/venv/
+backend/env/
+
+# Environment variables
+.env
+backend/.env
 
 # Django stuff
 *.log
