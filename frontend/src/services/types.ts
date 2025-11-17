@@ -18,7 +18,7 @@ export interface Product {
   description: string;
   price: number;
   category: string;
-  image: string; 
+  image: string;
   images: ProductImage[];
   owner: string;
   owner_name: string;
@@ -32,7 +32,7 @@ export interface ProductCreateUpdate {
   description: string;
   price: number;
   category: string;
-  image?: string; 
+  image?: string;
   image_urls?: string[];
 }
 
@@ -70,16 +70,24 @@ export interface AuthResponse {
 
 // Plant Types
 export interface Plant {
-  id: string;
+  id: number;
   name: string;
-  scientific_name: string;
+  species: string;
+  age: number;
+  height: number;
+  width: number;
   description: string;
-  care_level: string;
-  water_frequency: string;
-  sunlight: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
+  image?: string;
+}
+
+export interface PlantCreateUpdate {
+  name: string;
+  species: string;
+  age: number;
+  height: number;
+  width: number;
+  description: string;
+  image?: File | string;
 }
 
 // API Response Types
