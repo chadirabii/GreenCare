@@ -10,22 +10,41 @@ const api: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Enable sending cookies with requests
 });
 
 // ==========================================
-// Helper Functions
+// Token Management
 // ==========================================
 
 /**
- * Get CSRF token from cookie
+ * Get access token from localStorage
  */
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-  return null;
-}
+export const getAccessToken = (): string | null => {
+  return localStorage.getItem("access_token");
+};
+
+/**
+ * Get refresh token from localStorage
+ */
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem("refresh_token");
+};
+
+/**
+ * Set authentication tokens
+ */
+export const setTokens = (access: string, refresh: string): void => {
+  localStorage.setItem("access_token", access);
+  localStorage.setItem("refresh_token", refresh);
+};
+
+/**
+ * Clear authentication tokens
+ */
+export const clearTokens = (): void => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+};
 
 // ==========================================
 // Request Interceptor
@@ -33,10 +52,10 @@ function getCookie(name: string): string | null {
 
 api.interceptors.request.use(
   (config) => {
-    // Add CSRF token to all requests
-    const csrfToken = getCookie("csrftoken");
-    if (csrfToken) {
-      config.headers["X-CSRFToken"] = csrfToken;
+    // Add JWT token to all requests
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -50,19 +69,79 @@ api.interceptors.request.use(
 // Response Interceptor
 // ==========================================
 
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error: AxiosError) => {
-    // Handle common errors here
+  async (error: AxiosError) => {
+    const originalRequest: any = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = getRefreshToken();
+
+      if (!refreshToken) {
+        clearTokens();
+        window.location.href = "/auth";
+        return Promise.reject(error);
+      }
+
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/auth/token/refresh/",
+          { refresh: refreshToken }
+        );
+
+        const { access } = response.data;
+        setTokens(access, refreshToken);
+        processQueue(null, access);
+
+        originalRequest.headers.Authorization = `Bearer ${access}`;
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        clearTokens();
+        window.location.href = "/auth";
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     if (error.response) {
       const status = error.response.status;
 
       switch (status) {
-        case 401:
-          console.warn("Unauthorized - User needs to log in");
-          break;
         case 403:
           console.warn("Forbidden - Access denied");
           break;
@@ -78,23 +157,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// ==========================================
-// CSRF Initialization
-// ==========================================
-
-/**
- * Initialize CSRF token by making a request to the CSRF endpoint
- */
-export const initializeCSRF = async (): Promise<void> => {
-  try {
-    await api.get("/auth/csrf/");
-  } catch (error) {
-    console.warn(
-      "CSRF token initialization failed (this is OK for mock auth):",
-      error
-    );
-  }
-};
 
 export default api;
