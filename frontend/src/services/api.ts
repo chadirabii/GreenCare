@@ -20,30 +20,48 @@ const api: AxiosInstance = axios.create({
  * Get access token from localStorage
  */
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem("access_token");
+  try {
+    return localStorage.getItem("access_token");
+  } catch (e) {
+    console.error("Error accessing localStorage (getAccessToken):", e);
+    return null;
+  }
 };
 
 /**
  * Get refresh token from localStorage
  */
 export const getRefreshToken = (): string | null => {
-  return localStorage.getItem("refresh_token");
+  try {
+    return localStorage.getItem("refresh_token");
+  } catch (e) {
+    console.error("Error accessing localStorage (getRefreshToken):", e);
+    return null;
+  }
 };
 
 /**
  * Set authentication tokens
  */
 export const setTokens = (access: string, refresh: string): void => {
-  localStorage.setItem("access_token", access);
-  localStorage.setItem("refresh_token", refresh);
+  try {
+    localStorage.setItem("access_token", access);
+    localStorage.setItem("refresh_token", refresh);
+  } catch (e) {
+    console.error("Error setting localStorage tokens:", e);
+  }
 };
 
 /**
  * Clear authentication tokens
  */
 export const clearTokens = (): void => {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+  try {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  } catch (e) {
+    console.error("Error clearing localStorage tokens:", e);
+  }
 };
 
 // ==========================================
@@ -70,8 +88,12 @@ api.interceptors.request.use(
 // ==========================================
 
 let isRefreshing = false;
-let failedQueue: any[] = [];
 
+interface QueueItem {
+  resolve: (value: string | null) => void;
+  reject: (error: any) => void;
+}
+let failedQueue: QueueItem[] = [];
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -118,7 +140,7 @@ api.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          "http://localhost:8000/api/auth/token/refresh/",
+          `${api.defaults.baseURL}/auth/token/refresh/`,
           { refresh: refreshToken }
         );
 

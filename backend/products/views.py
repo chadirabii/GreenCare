@@ -30,7 +30,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             # Everyone can list and view products
             return [IsAuthenticatedOrReadOnly()]
 
-        return super().get_permissions()
 
     def get_queryset(self):
         queryset = Product.objects.all()

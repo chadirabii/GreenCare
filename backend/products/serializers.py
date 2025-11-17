@@ -18,6 +18,7 @@ class ProductSerializer(serializers.ModelSerializer):
         child=serializers.URLField(),
         write_only=True,
         required=False,
+        # NOTE: This value (max_length=5) should match the MAX_IMAGES constant in the frontend ProductForm component.
         max_length=5,
         help_text="List of image URLs (max 5)"
     )
