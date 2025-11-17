@@ -24,7 +24,9 @@ export const getPlantById = async (id: number): Promise<Plant> => {
 /**
  * Create a new plant
  */
-export const createPlant = async (plantData: PlantCreateUpdate): Promise<Plant> => {
+export const createPlant = async (
+  plantData: PlantCreateUpdate
+): Promise<Plant> => {
   // Send only the data without FormData
   const data = {
     name: plantData.name,
@@ -33,9 +35,9 @@ export const createPlant = async (plantData: PlantCreateUpdate): Promise<Plant> 
     height: plantData.height,
     width: plantData.width,
     description: plantData.description,
-    image: typeof plantData.image === 'string' ? plantData.image : '',
+    image: typeof plantData.image === "string" ? plantData.image : "",
   };
-  
+
   const response = await api.post("/plants/", data);
   return response.data;
 };
@@ -55,9 +57,9 @@ export const updatePlant = async (
     height: plantData.height,
     width: plantData.width,
     description: plantData.description,
-    image: typeof plantData.image === 'string' ? plantData.image : '',
+    image: typeof plantData.image === "string" ? plantData.image : "",
   };
-  
+
   const response = await api.put(`/plants/${id}/`, data);
   return response.data;
 };

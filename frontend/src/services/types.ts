@@ -18,7 +18,7 @@ export interface Product {
   description: string;
   price: number;
   category: string;
-  image: string; 
+  image: string;
   images: ProductImage[];
   owner: string;
   owner_name: string;
@@ -32,7 +32,7 @@ export interface ProductCreateUpdate {
   description: string;
   price: number;
   category: string;
-  image?: string; 
+  image?: string;
   image_urls?: string[];
 }
 
