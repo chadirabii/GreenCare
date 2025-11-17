@@ -1,44 +1,44 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Search, Pencil, Trash2, Loader2 } from 'lucide-react';
-import { AppLayout } from '@/components/AppLayout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
+import { AppLayout } from "@/components/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as plantService from '@/services/plantService';
-import { Plant, PlantCreateUpdate } from '@/services/types';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import * as plantService from "@/services/plantService";
+import { Plant, PlantCreateUpdate } from "@/services/types";
 
 const Plants = () => {
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState<PlantCreateUpdate>({
-    name: '',
-    species: '',
+    name: "",
+    species: "",
     age: 0,
     height: 0,
     width: 0,
-    description: '',
+    description: "",
   });
 
   // Fetch plants
   const { data: plants = [], isLoading } = useQuery({
-    queryKey: ['plants'],
+    queryKey: ["plants"],
     queryFn: plantService.getAllPlants,
   });
 
@@ -46,12 +46,12 @@ const Plants = () => {
   const createMutation = useMutation({
     mutationFn: plantService.createPlant,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['plants'] });
-      toast.success('Plant added successfully');
+      queryClient.invalidateQueries({ queryKey: ["plants"] });
+      toast.success("Plant added successfully");
       handleCloseDialog();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to add plant');
+      toast.error(error.response?.data?.error || "Failed to add plant");
     },
   });
 
@@ -60,12 +60,12 @@ const Plants = () => {
     mutationFn: ({ id, data }: { id: number; data: PlantCreateUpdate }) =>
       plantService.updatePlant(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['plants'] });
-      toast.success('Plant updated successfully');
+      queryClient.invalidateQueries({ queryKey: ["plants"] });
+      toast.success("Plant updated successfully");
       handleCloseDialog();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to update plant');
+      toast.error(error.response?.data?.error || "Failed to update plant");
     },
   });
 
@@ -73,17 +73,18 @@ const Plants = () => {
   const deleteMutation = useMutation({
     mutationFn: plantService.deletePlant,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['plants'] });
-      toast.success('Plant deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["plants"] });
+      toast.success("Plant deleted successfully");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to delete plant');
+      toast.error(error.response?.data?.error || "Failed to delete plant");
     },
   });
 
-  const filteredPlants = plants.filter((plant) =>
-    plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plant.species.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPlants = plants.filter(
+    (plant) =>
+      plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      plant.species.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,15 +101,15 @@ const Plants = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setUploading(true);
-    let imageUrl = formData.image as string || '';
+    let imageUrl = (formData.image as string) || "";
 
     if (imageFile) {
       try {
         imageUrl = await plantService.uploadPlantImage(imageFile);
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Failed to upload image');
+        toast.error(error.response?.data?.error || "Failed to upload image");
         setUploading(false);
         return;
       }
@@ -137,12 +138,12 @@ const Plants = () => {
       width: plant.width,
       description: plant.description,
     });
-    setImagePreview(plant.image || '');
+    setImagePreview(plant.image || "");
     setIsDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this plant?')) {
+    if (confirm("Are you sure you want to delete this plant?")) {
       deleteMutation.mutate(id);
     }
   };
@@ -151,14 +152,14 @@ const Plants = () => {
     setIsDialogOpen(false);
     setEditingPlant(null);
     setImageFile(null);
-    setImagePreview('');
+    setImagePreview("");
     setFormData({
-      name: '',
-      species: '',
+      name: "",
+      species: "",
       age: 0,
       height: 0,
       width: 0,
-      description: '',
+      description: "",
     });
   };
 
@@ -171,8 +172,12 @@ const Plants = () => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Plant Management</h1>
-            <p className="text-muted-foreground">Manage your plants and crops</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Plant Management
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your plants and crops
+            </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -183,7 +188,9 @@ const Plants = () => {
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingPlant ? 'Edit Plant' : 'Add New Plant'}</DialogTitle>
+                <DialogTitle>
+                  {editingPlant ? "Edit Plant" : "Add New Plant"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -191,7 +198,9 @@ const Plants = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -200,7 +209,9 @@ const Plants = () => {
                   <Input
                     id="species"
                     value={formData.species}
-                    onChange={(e) => setFormData({ ...formData, species: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, species: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -212,7 +223,12 @@ const Plants = () => {
                       type="number"
                       min="0"
                       value={formData.age}
-                      onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          age: parseInt(e.target.value) || 0,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -224,7 +240,12 @@ const Plants = () => {
                       min="0"
                       step="0.1"
                       value={formData.height}
-                      onChange={(e) => setFormData({ ...formData, height: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          height: parseFloat(e.target.value) || 0,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -236,7 +257,12 @@ const Plants = () => {
                       min="0"
                       step="0.1"
                       value={formData.width}
-                      onChange={(e) => setFormData({ ...formData, width: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          width: parseFloat(e.target.value) || 0,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -246,7 +272,9 @@ const Plants = () => {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                     required
                   />
@@ -272,12 +300,22 @@ const Plants = () => {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={createMutation.isPending || updateMutation.isPending || uploading}
+                  disabled={
+                    createMutation.isPending ||
+                    updateMutation.isPending ||
+                    uploading
+                  }
                 >
-                  {(createMutation.isPending || updateMutation.isPending || uploading) && (
+                  {(createMutation.isPending ||
+                    updateMutation.isPending ||
+                    uploading) && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  {uploading ? 'Uploading image...' : editingPlant ? 'Update Plant' : 'Add Plant'}
+                  {uploading
+                    ? "Uploading image..."
+                    : editingPlant
+                    ? "Update Plant"
+                    : "Add Plant"}
                 </Button>
               </form>
             </DialogContent>
@@ -324,7 +362,9 @@ const Plants = () => {
                 <div className="p-4 space-y-3">
                   <div>
                     <h3 className="font-semibold text-lg">{plant.name}</h3>
-                    <p className="text-sm text-muted-foreground italic">{plant.species}</p>
+                    <p className="text-sm text-muted-foreground italic">
+                      {plant.species}
+                    </p>
                   </div>
                   <p className="text-sm line-clamp-2">{plant.description}</p>
                   <div className="grid grid-cols-3 gap-2 text-sm">
