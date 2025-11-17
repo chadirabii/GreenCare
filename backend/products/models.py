@@ -17,7 +17,7 @@ class Product(models.Model):
     image = models.URLField(max_length=500, blank=True, null=True)
     owner = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name='products',
-        null=True, blank=True)  # Temporarily nullable for development
+        null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,3 +26,23 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class ProductImage(models.Model):
+    """Model to store multiple images for a product"""
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    image_url = models.URLField(max_length=500)
+    public_id = models.CharField(
+        max_length=200, blank=True, null=True)  
+    order = models.PositiveIntegerField(default=0) 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return f"{self.product.name} - Image {self.order}"

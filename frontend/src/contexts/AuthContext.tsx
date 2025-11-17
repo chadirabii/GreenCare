@@ -1,56 +1,97 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import * as authService from "@/services/authService";
+import { setTokens, clearTokens, getAccessToken } from "@/services/api";
+import { User, LoginCredentials, RegisterData } from "@/services/types";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('greencare_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const loadUser = async () => {
+      const token = getAccessToken();
+
+      if (token) {
+        try {
+          // Fetch current user from backend using token
+          const currentUser = await authService.getCurrentUser();
+          setUser(currentUser);
+        } catch (error) {
+          // Token is invalid, clear everything
+          clearTokens();
+          setUser(null);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    loadUser();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Mock login - in production, this would call your backend
-    const mockUser = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
-    };
-    setUser(mockUser);
-    localStorage.setItem('greencare_user', JSON.stringify(mockUser));
-    navigate('/dashboard');
+  const login = async (credentials: LoginCredentials) => {
+    try {
+      const response = await authService.login(credentials);
+
+      setTokens(response.access, response.refresh);
+
+      setUser(response.user);
+
+      navigate("/dashboard", { replace: true });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      throw new Error(error.response?.data?.error || "Login failed");
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('greencare_user');
-    navigate('/auth');
+  const register = async (data: RegisterData) => {
+    try {
+      const response = await authService.register(data);
+
+      setTokens(response.access, response.refresh);
+
+      setUser(response.user);
+
+      navigate("/dashboard", { replace: true });
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      throw new Error(error.response?.data?.error || "Registration failed");
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        await authService.logout(refreshToken);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Clear all auth data
+      setUser(null);
+      clearTokens();
+      navigate("/auth");
+    }
   };
 
   const updateProfile = (data: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);
-      localStorage.setItem('greencare_user', JSON.stringify(updatedUser));
     }
   };
 
@@ -59,9 +100,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         user,
         login,
+        register,
         logout,
         updateProfile,
         isAuthenticated: !!user,
+        isLoading,
       }}
     >
       {children}
@@ -72,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
