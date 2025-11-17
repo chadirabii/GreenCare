@@ -4,19 +4,28 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Leaf, Mail, Lock, User, ArrowLeft, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import authBg from "@/assets/auth-bg.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Auth = () => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     password: "",
+    role: "plant_owner" as "admin" | "farmer" | "plant_owner" | "seller",
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -24,10 +33,12 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      await login(loginData.email, loginData.password);
+      await login(loginData);
       toast.success("Welcome back to GreenCare!");
-    } catch (error) {
-      toast.error("Login failed. Please try again.");
+    } catch (error: any) {
+      toast.error(
+        error.message || "Login failed. Please check your credentials."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -38,10 +49,10 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      await login(signupData.email, signupData.password);
+      await register(signupData);
       toast.success("Account created successfully! Welcome to GreenCare!");
-    } catch (error) {
-      toast.error("Signup failed. Please try again.");
+    } catch (error: any) {
+      toast.error(error.message || "Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -177,28 +188,51 @@ const Auth = () => {
                 </p>
 
                 <form onSubmit={handleSignup} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="signup-name"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="signup-firstname"
+                        className="block text-sm font-medium text-foreground mb-2"
+                      >
+                        First Name
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                          id="signup-firstname"
+                          type="text"
+                          required
+                          value={signupData.first_name}
+                          onChange={(e) =>
+                            setSignupData((prev) => ({
+                              ...prev,
+                              first_name: e.target.value,
+                            }))
+                          }
+                          placeholder="John"
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="signup-lastname"
+                        className="block text-sm font-medium text-foreground mb-2"
+                      >
+                        Last Name
+                      </label>
                       <Input
-                        id="signup-name"
+                        id="signup-lastname"
                         type="text"
                         required
-                        value={signupData.name}
+                        value={signupData.last_name}
                         onChange={(e) =>
                           setSignupData((prev) => ({
                             ...prev,
-                            name: e.target.value,
+                            last_name: e.target.value,
                           }))
                         }
-                        placeholder="John Doe"
-                        className="pl-10"
+                        placeholder="Doe"
                       />
                     </div>
                   </div>
@@ -252,6 +286,39 @@ const Auth = () => {
                         placeholder="••••••••"
                         className="pl-10"
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="signup-role"
+                      className="block text-sm font-medium text-foreground mb-2"
+                    >
+                      Account Type
+                    </label>
+                    <div className="relative">
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                      <Select
+                        value={signupData.role}
+                        onValueChange={(value: any) =>
+                          setSignupData((prev) => ({
+                            ...prev,
+                            role: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="pl-10">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="plant_owner">
+                            Plant Owner
+                          </SelectItem>
+                          <SelectItem value="farmer">Farmer</SelectItem>
+                          <SelectItem value="seller">Seller</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 

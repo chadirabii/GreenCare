@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 import cloudinary
 import os
 from pathlib import Path
@@ -17,7 +18,6 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
-from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,13 +60,6 @@ INSTALLED_APPS = [
     'products',
     'plant_watering.apps.PlantWateringConfig',
 ]
-
-# Use JWT authentication
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT tokens
-    ],
-}
 
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': True,
@@ -165,7 +158,7 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',

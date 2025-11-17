@@ -8,6 +8,7 @@ import { ProductForm } from "@/components/ProductForm";
 import { DeleteProductDialog } from "@/components/DeleteProductDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import {
   getMyProducts,
   createProduct,
@@ -55,8 +56,17 @@ const MyProducts = () => {
   };
 
   useEffect(() => {
+    if (user?.role !== "seller") {
+      toast({
+        title: "Access Denied",
+        description: "Only sellers can manage products",
+        variant: "destructive",
+      });
+      navigate("/products");
+      return;
+    }
     fetchMyProducts();
-  }, []);
+  }, [user]);
 
   const handleAddProduct = () => {
     setEditingProduct(undefined);
@@ -162,77 +172,83 @@ const MyProducts = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {myProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="border rounded-lg p-4 bg-card hover:shadow-md transition-shadow"
-              >
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="w-full sm:w-32 h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            {myProducts.map((product, index) => {
+              const fallbackImage = product.image || "/placeholder.svg";
 
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {product.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {product.description}
-                        </p>
-                      </div>
-                      <span className="text-xl font-bold text-primary whitespace-nowrap">
-                        ${product.price}
-                      </span>
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="border rounded-lg p-4 bg-card hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="w-full sm:w-32 flex-shrink-0">
+                      <ProductImageCarousel
+                        images={product.images}
+                        fallbackImage={fallbackImage}
+                        productName={product.name}
+                        autoPlayInterval={3000}
+                        className="rounded-lg overflow-hidden"
+                      />
                     </div>
 
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                        {product.category}
-                      </span>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {product.description}
+                          </p>
+                        </div>
+                        <span className="text-xl font-bold text-primary whitespace-nowrap">
+                          ${product.price}
+                        </span>
+                      </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/products/${product.id}`)}
-                          className="gap-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditProduct(product)}
-                          className="gap-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteClick(product)}
-                          className="gap-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </Button>
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                          {product.category}
+                        </span>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/products/${product.id}`)}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditProduct(product)}
+                            className="gap-2"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClick(product)}
+                            className="gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </motion.div>
