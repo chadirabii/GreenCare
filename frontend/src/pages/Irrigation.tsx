@@ -1,8 +1,47 @@
 import { motion } from 'framer-motion';
 import { Droplets, Cloud, Thermometer, Droplet, Wind, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getWeather } from '@/services/wateringService';
+
+
+
+// AI irrigation recommendation logic
+function getIrrigationRecommendation(weather, forecast) {
+  const { temp, humidity, rainfall, wind } = weather;
+  const tomorrowRain = forecast?.[1]?.rainfall || 0;
+
+  if (rainfall > 5 || tomorrowRain > 5) {
+    return {
+      text: "Skip irrigation today.",
+      details: `Rain expected (${rainfall}mm today${tomorrowRain ? `, ${tomorrowRain}mm tomorrow` : ""}).`,
+      morning: 0,
+      evening: 0,
+    };
+  }
+
+  let minutes;
+  if (temp > 32) minutes = 45;
+  else if (temp < 20) minutes = 20;
+  else minutes = 30;
+
+  if (humidity > 70) minutes -= 10;
+  if (humidity < 40) minutes += 10;
+
+  const time = wind > 30 ? "at night to reduce evaporation" : "in the evening";
+
+  return {
+    text: `Irrigate your crops for ${minutes} minutes ${time}.`,
+    details: `Current temperature: ${temp}°C, humidity: ${humidity}%, wind: ${wind} km/h.`,
+    morning: 30, // you can also calculate dynamically if needed
+    evening: minutes,
+  };
+}
+
+
+
+
+
 
 
 // Current weather
@@ -15,7 +54,7 @@ const Irrigation = () => {
     });
   
     // Dynamic 5-day forecast
-  const [forecast, setForecast] = useState([]);
+    const [forecast, setForecast] = useState([]);
     useEffect(() => {
       const fetchWeather = async () => {
         try {
@@ -57,6 +96,9 @@ const Irrigation = () => {
   
       fetchWeather();
     }, []);
+    // Dynamic AI recommendation
+  const aiRecommendation = useMemo(() => getIrrigationRecommendation(weatherData, forecast), [weatherData, forecast]);
+
   return (
     <AppLayout>
       <motion.div
@@ -83,13 +125,14 @@ const Irrigation = () => {
               <h3 className="text-lg font-semibold">AI Irrigation Recommendation</h3>
             </div>
             <p className="text-lg mb-2">
-              Based on current conditions, irrigate your crops for <strong>30 minutes</strong> in the evening.
+              <strong>{aiRecommendation.text}</strong>
             </p>
-            <p className="text-sm text-muted-foreground">
-              Soil moisture is at optimal levels. Light rainfall expected Wednesday. Monitor drainage in low-lying areas.
-            </p>
+            <p className="text-sm text-muted-foreground">{aiRecommendation.details}</p>
           </div>
         </motion.div>
+
+
+
 
         {/* Current Weather */}
         <div>
@@ -204,7 +247,7 @@ const Irrigation = () => {
     </div>
   )}
 </div>
- {/* Irrigation Schedule */}
+        {/* Irrigation Schedule */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
