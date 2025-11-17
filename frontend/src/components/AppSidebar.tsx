@@ -29,6 +29,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuSections = [
   {
@@ -43,8 +44,18 @@ const menuSections = [
     title: "Marketplace",
     items: [
       { title: "Products", url: "/products", icon: ShoppingBag },
-      { title: "My Products", url: "/my-products", icon: Package },
-      { title: "My Sales", url: "/my-sales", icon: TrendingUp },
+      {
+        title: "My Products",
+        url: "/my-products",
+        icon: Package,
+        roles: ["seller"],
+      },
+      {
+        title: "My Sales",
+        url: "/my-sales",
+        icon: TrendingUp,
+        roles: ["seller"],
+      },
     ],
   },
   {
@@ -62,6 +73,14 @@ const menuSections = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const { user } = useAuth();
+
+  const filterMenuItems = (items: any[]) => {
+    return items.filter((item) => {
+      if (!item.roles) return true; 
+      return item.roles.includes(user?.role);
+    });
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -101,7 +120,7 @@ export function AppSidebar() {
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-0.5 sm:space-y-1 mt-1">
-                    {section.items.map((item) => (
+                    {filterMenuItems(section.items).map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild tooltip={item.title}>
                           <NavLink
