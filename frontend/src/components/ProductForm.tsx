@@ -34,7 +34,7 @@ interface Product {
 interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (product: any) => void;
+  onSubmit: (product: Product) => void;
   product?: Product;
 }
 
