@@ -74,3 +74,16 @@ export interface ApiError {
   error: string;
   details?: Record<string, string[]>;
 }
+
+
+
+export interface PlantWatering {
+  id?: number;
+  plant?: number;
+  plant_name?: string;
+  watering_date: string;
+  next_watering_date?: string;
+  amount_ml: number;
+  notes?: string;
+  is_completed: boolean;
+}

@@ -1,16 +1,62 @@
 import { motion } from 'framer-motion';
 import { Droplets, Cloud, Thermometer, Droplet, Wind, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
+import { useEffect, useState } from 'react';
+import { getWeather } from '@/services/wateringService';
 
-const weatherForecast = [
-  { day: 'Monday', temp: 24, humidity: 65, rainfall: 0, icon: Cloud },
-  { day: 'Tuesday', temp: 26, humidity: 58, rainfall: 2, icon: Droplet },
-  { day: 'Wednesday', temp: 23, humidity: 72, rainfall: 8, icon: Cloud },
-  { day: 'Thursday', temp: 25, humidity: 60, rainfall: 0, icon: Thermometer },
-  { day: 'Friday', temp: 27, humidity: 55, rainfall: 0, icon: Wind },
-];
 
+// Current weather
 const Irrigation = () => {
+   const [weatherData, setWeatherData] = useState({
+      temp: 0,
+      humidity: 0,
+      rainfall: 0,
+      wind: 0,
+    });
+  
+    // Dynamic 5-day forecast
+  const [forecast, setForecast] = useState([]);
+    useEffect(() => {
+      const fetchWeather = async () => {
+        try {
+          const data = await getWeather();
+          console.log('Weather data received:', data);
+          if (data) {
+             // Current conditions
+            setWeatherData({
+              temp: data.temperature_max?.[0] || 0,
+              humidity: data.relative_humidity_max?.[0] || 0,
+              rainfall: data.precipitation?.[0] || 0,
+              wind: data.windspeed_max?.[0] || 0,
+            });
+            console.log('Weather state updated:', {
+              temp: data.temperature_max?.[0] || 0,
+              humidity: data.relative_humidity_max?.[0] || 0,
+              rainfall: data.precipitation?.[0] || 0,
+              wind: data.windspeed_max?.[0] || 0,
+            });
+             // Build dynamic 5-day forecast
+              const formatted = data.temperature_max
+            .slice(0, 5)
+            .map((temp, i) => ({
+              day: new Date(data.dates[i]).toLocaleDateString("en-US", {
+                weekday: "long",
+              }),
+              temp: temp,
+              humidity: data.relative_humidity_max[i],
+              rainfall: data.precipitation[i],
+              icon: Cloud, // default icon (you can change later)
+            }));
+
+          setForecast(formatted);
+          }
+        } catch (error) {
+          console.error('Error in fetchWeather:', error);
+        }
+      };
+  
+      fetchWeather();
+    }, []);
   return (
     <AppLayout>
       <motion.div
@@ -49,6 +95,7 @@ const Irrigation = () => {
         <div>
           <h2 className="text-xl font-semibold mb-4">Current Conditions</h2>
           <div className="grid gap-4 md:grid-cols-4">
+              {/* TEMP */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -61,11 +108,11 @@ const Irrigation = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Temperature</p>
-                  <p className="text-3xl font-bold">24°C</p>
+                  <p className="text-3xl font-bold">{weatherData.temp}°C</p>
                 </div>
               </div>
             </motion.div>
-
+            {/* HUMIDITY */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,11 +125,11 @@ const Irrigation = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Humidity</p>
-                  <p className="text-3xl font-bold">65%</p>
+                  <p className="text-3xl font-bold">{weatherData.humidity}%</p>
                 </div>
               </div>
             </motion.div>
-
+            {/* RAIN */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -95,11 +142,11 @@ const Irrigation = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Rainfall</p>
-                  <p className="text-3xl font-bold">12mm</p>
+                  <p className="text-3xl font-bold">{weatherData.rainfall}mm</p>
                 </div>
               </div>
             </motion.div>
-
+            {/* WIND */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -112,38 +159,52 @@ const Irrigation = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Wind Speed</p>
-                  <p className="text-3xl font-bold">8 km/h</p>
+                  <p className="text-3xl font-bold">{weatherData.wind} km/h</p>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Weekly Forecast */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">5-Day Forecast</h2>
-          <div className="grid gap-4 md:grid-cols-5">
-            {weatherForecast.map((day, index) => (
-              <motion.div
-                key={day.day}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-                className="border rounded-lg p-4 text-center hover:shadow-md transition-shadow"
-              >
-                <p className="font-semibold mb-2">{day.day}</p>
-                <day.icon className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <p className="text-2xl font-bold mb-2">{day.temp}°C</p>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <p>Humidity: {day.humidity}%</p>
-                  <p>Rain: {day.rainfall}mm</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+ 
 
-        {/* Irrigation Schedule */}
+
+        {/* Weekly Forecast */}
+<div>
+  <h2 className="text-xl font-semibold mb-4">5-Day Forecast</h2>
+
+  {forecast.length === 0 ? (
+    <p className="text-muted-foreground">Loading forecast...</p>
+  ) : (
+    <div className="grid gap-4 md:grid-cols-5">
+      {forecast.map((day, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 + index * 0.1 }}
+          className="border rounded-lg p-4 text-center hover:shadow-md transition-shadow"
+        >
+          {/* Day name: Monday, Tuesday, etc. */}
+          <p className="font-semibold mb-2">{day.day}</p>
+
+          {/* Weather icon */}
+          {day.icon && <day.icon className="h-8 w-8 mx-auto mb-2 text-primary" />}
+
+          {/* Temperature */}
+          <p className="text-2xl font-bold mb-2">{day.temp}°C</p>
+
+          {/* Humidity + Rainfall */}
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p>Humidity: {day.humidity}%</p>
+            <p>Rain: {day.rainfall}mm</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )}
+</div>
+ {/* Irrigation Schedule */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -154,6 +215,7 @@ const Irrigation = () => {
             <Droplets className="h-5 w-5 text-primary" />
             Recommended Irrigation Schedule
           </h2>
+
           <div className="space-y-3">
             <div className="flex items-center justify-between py-3 border-b">
               <div>
@@ -164,6 +226,7 @@ const Irrigation = () => {
                 30 min
               </span>
             </div>
+
             <div className="flex items-center justify-between py-3 border-b">
               <div>
                 <p className="font-medium">Evening Session</p>
@@ -173,6 +236,7 @@ const Irrigation = () => {
                 30 min
               </span>
             </div>
+
             <div className="flex items-center justify-between py-3">
               <div>
                 <p className="font-medium">Wednesday (Skip)</p>
