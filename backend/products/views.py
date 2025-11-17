@@ -2,8 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-from rest_framework.exceptions import PermissionDenied
-from authentication.permissions import IsSellerOrReadOnly
+from authentication.permissions import IsSellerOrReadOnly, IsSeller
 from .models import Product
 from .serializers import ProductSerializer
 import cloudinary.uploader
@@ -20,7 +19,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         if self.action in ['create', 'upload_image']:
             # Only sellers can create products and upload images
-            return [IsAuthenticated(), IsSellerOrReadOnly()]
+            return [IsAuthenticated(), IsSeller()]
         elif self.action in ['update', 'partial_update', 'destroy']:
             # Only owners can update/delete their products
             return [IsAuthenticated()]
@@ -31,7 +30,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             # Everyone can list and view products
             return [IsAuthenticatedOrReadOnly()]
 
-        return super().get_permissions()
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -70,7 +68,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsSellerOrReadOnly])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsSeller])
     def upload_image(self, request):
         """Upload image to Cloudinary and return the URL (sellers only)"""
         try:
