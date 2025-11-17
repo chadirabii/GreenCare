@@ -300,7 +300,7 @@ const Auth = () => {
                       <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
                       <Select
                         value={signupData.role}
-                        onValueChange={(value: any) =>
+                        onValueChange={(value: "admin" | "farmer" | "plant_owner" | "seller") =>
                           setSignupData((prev) => ({
                             ...prev,
                             role: value,
