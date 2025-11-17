@@ -52,13 +52,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         """Only allow users to update their own products"""
         product = self.get_object()
         if product.owner != self.request.user:
-            raise PermissionError("You can only update your own products")
+            raise PermissionDenied("You can only update your own products")
         serializer.save()
 
     def perform_destroy(self, instance):
         """Only allow users to delete their own products"""
         if instance.owner != self.request.user:
-            raise PermissionError("You can only delete your own products")
+            raise PermissionDenied("You can only delete your own products")
         instance.delete()
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
