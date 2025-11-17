@@ -57,7 +57,7 @@ const MyProducts = () => {
 
   useEffect(() => {
     fetchMyProducts();
-  }, [fetchMyProducts]);
+  }, [user, toast, navigate]);
 
   const handleAddProduct = () => {
     setEditingProduct(undefined);
