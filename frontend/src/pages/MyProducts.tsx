@@ -66,7 +66,7 @@ const MyProducts = () => {
       return;
     }
     fetchMyProducts();
-  }, [user]);
+  }, [user, toast, navigate]);
 
   const handleAddProduct = () => {
     setEditingProduct(undefined);
