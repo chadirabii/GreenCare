@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.exceptions import PermissionDenied
 from authentication.permissions import IsSellerOrReadOnly
 from .models import Product
 from .serializers import ProductSerializer
@@ -53,13 +54,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         """Only allow users to update their own products"""
         product = self.get_object()
         if product.owner != self.request.user:
-            raise PermissionError("You can only update your own products")
+            raise PermissionDenied("You can only update your own products")
         serializer.save()
 
     def perform_destroy(self, instance):
         """Only allow users to delete their own products"""
         if instance.owner != self.request.user:
-            raise PermissionError("You can only delete your own products")
+            raise PermissionDenied("You can only delete your own products")
         instance.delete()
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
