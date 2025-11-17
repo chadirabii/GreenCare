@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ const MyProducts = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const fetchMyProducts = async () => {
+  const fetchMyProducts = useCallback(async () => {
     try {
       setLoading(true);
       const products = await getMyProducts();
@@ -53,20 +53,11 @@ const MyProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    if (user?.role !== "seller") {
-      toast({
-        title: "Access Denied",
-        description: "Only sellers can manage products",
-        variant: "destructive",
-      });
-      navigate("/products");
-      return;
-    }
     fetchMyProducts();
-  }, [user]);
+  }, [user, toast, navigate]);
 
   const handleAddProduct = () => {
     setEditingProduct(undefined);
