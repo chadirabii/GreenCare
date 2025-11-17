@@ -8,7 +8,7 @@ class Plants(models.Model):
     height = models.FloatField()
     width = models.FloatField()
     description = models.TextField()
-    image = models.ImageField(upload_to='plants/', null=True, blank=True)
+    image = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.species}"
