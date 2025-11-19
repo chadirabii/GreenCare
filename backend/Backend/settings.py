@@ -231,3 +231,23 @@ cloudinary.config(
 
 # Default file storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+#-------------------------------------------------
+# SMTP
+#-----------
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Gmail address
+EMAIL_HOST_USER = os.getenv('EMAIL_USER')
+
+# App Password
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
+
+#-------------------------------------------------
+
+# Front-end url
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8080')

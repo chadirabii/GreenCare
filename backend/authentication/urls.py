@@ -3,7 +3,7 @@ from django.contrib import admin
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .swagger import schema_view
-from authentication.views import register_view, login_view, logout_view, get_current_user
+from authentication.views import *
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -11,7 +11,11 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('me/', get_current_user, name='current-user'),
+    path('forgot-password/', forgot_password, name='forgot-password'),
+    path('reset-password/', reset_password, name='reset-password'),
+    
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    
     path('swagger/', schema_view.with_ui('swagger',
          cache_timeout=0), name='schema-swagger-ui'),
 ]

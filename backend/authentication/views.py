@@ -8,7 +8,11 @@ from authentication.models import CustomUser
 from authentication.serializers import *
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
 
 @swagger_auto_schema(request_body=LoginSerializer, method="post")
 @api_view(["POST"])
@@ -116,3 +120,68 @@ def logout_view(request):
 def get_current_user(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+# Forgot password
+# @swagger_auto_schema(request_body=PasswordResetRequestSerializer, method='post')
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    serializer = PasswordResetRequestSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        
+        try:
+            user = CustomUser.objects.get(email = email)
+            
+            # Generate a unique token and ID for the user
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
+            
+            send_mail(
+                subject= "Password Reset Request",
+                message=f"Click the link to reset your password: {reset_link}",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False
+            )
+            
+            return Response({"message": "Password reset link sent to email", "uid": uid, "token": token}, status=status.HTTP_200_OK)
+            
+        except CustomUser.DoesNotExist:
+            return Response({"message": "Invalid email"}, status=status.HTTP_404_NOT_FOUND)
+        
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request):
+    serializer = PasswordResetConfirmSerializer(data = request.data)
+    
+    if serializer.is_valid():
+        uid = serializer.validated_data['uid']
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']        
+        
+        try:
+            # Decode id
+            user_id = force_str(urlsafe_base64_decode(uid))
+            user = CustomUser.objects.get(pk = user_id)
+            
+            if default_token_generator.check_token(user, token):
+                user.set_password(new_password)
+                user.save()    
+            
+            return Response({"message": "Password has been reset successfully"}, status=status.HTTP_200_OK)
+        
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            return Response({"error": "Invalid user ID"}, status=status.HTTP_400_BAD_REQUEST)             
+        
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    

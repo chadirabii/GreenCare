@@ -31,4 +31,16 @@ class UserSerializer(serializers.ModelSerializer):
         
         # FIelds that can't be changed through the API
         read_only_fields = ['id', 'created_at']
-        
+
+
+# Forgot password:
+# - validate email request
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+# - handle actual password reset
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
+    uid = serializers.CharField()
+    token = serializers.CharField()
