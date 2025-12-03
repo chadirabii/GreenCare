@@ -1,7 +1,7 @@
 import api from './api';
 import { PlantWatering } from './types';
 // Backend registers the plant_watering router at /api/watering/ (see Backend/urls.py)
-const API_URL = 'http://127.0.0.1:8000/api/watering/';
+// const API_URL = 'http://127.0.0.1:8000/api/watering/';
 
 
 

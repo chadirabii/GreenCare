@@ -5,7 +5,7 @@ import axios, { AxiosInstance, AxiosError } from "axios";
 // ==========================================
 
 const api: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://192.168.49.2:30001",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
