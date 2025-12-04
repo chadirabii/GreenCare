@@ -23,7 +23,7 @@ import Irrigation from "./pages/Irrigation";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-
+import HistoryDetails from "./pages/HistoryDetails"
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
@@ -128,6 +128,7 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/history/:id" element={<ProtectedRoute><HistoryDetails /></ProtectedRoute>} />
         <Route
           path="/profile"
           element={

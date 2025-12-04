@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'authentication',
     'plants',
     'products',
+    'predict',
     'plant_watering.apps.PlantWateringConfig',
 ]
 
