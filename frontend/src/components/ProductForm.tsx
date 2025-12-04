@@ -16,9 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, X } from "lucide-react";
 import { uploadProductImage } from "@/services/productService";
 import { useToast } from "@/hooks/use-toast";
+import type { ProductImage } from "@/services/types";
 
 interface Product {
   id?: string;
@@ -26,7 +27,8 @@ interface Product {
   description: string;
   price: number;
   category: string;
-  image: string;
+  image?: string;
+  images?: ProductImage[];
 }
 
 interface ProductFormProps {
@@ -37,6 +39,7 @@ interface ProductFormProps {
 }
 
 const CATEGORIES = ["plants", "medicines", "tools", "fertilizers"];
+const MAX_IMAGES = 5;
 
 export const ProductForm = ({
   open,
@@ -50,40 +53,71 @@ export const ProductForm = ({
     description: "",
     price: 0,
     category: "plants",
-    image: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
       setFormData(product);
-      setImagePreview(product.image);
+      // Set existing images from the product
+      const existing =
+        product.images?.map((img) => img.image_url) ||
+        (product.image ? [product.image] : []);
+      setExistingImages(existing);
+      setImagePreviews(existing);
+      setSelectedFiles([]);
     } else {
       setFormData({
         name: "",
         description: "",
         price: 0,
         category: "plants",
-        image: "",
       });
-      setImagePreview("");
-      setSelectedFile(null);
+      setImagePreviews([]);
+      setSelectedFiles([]);
+      setExistingImages([]);
     }
     setErrors({});
   }, [product, open]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    const files = Array.from(e.target.files || []);
+    const totalImages = imagePreviews.length + files.length;
+
+    if (totalImages > MAX_IMAGES) {
+      toast({
+        title: "Too many images",
+        description: `You can upload a maximum of ${MAX_IMAGES} images`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Read and preview new files
+    files.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setImagePreviews((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
+    });
+
+    setSelectedFiles((prev) => [...prev, ...files]);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+
+    if (index >= existingImages.length) {
+      const fileIndex = index - existingImages.length;
+      setSelectedFiles((prev) => prev.filter((_, i) => i !== fileIndex));
+    } else {
+      // Remove from existing images
+      setExistingImages((prev) => prev.filter((_, i) => i !== index));
     }
   };
 
@@ -106,8 +140,8 @@ export const ProductForm = ({
       newErrors.category = "Category is required";
     }
 
-    if (!product && !selectedFile && !formData.image) {
-      newErrors.image = "Product image is required";
+    if (!product && imagePreviews.length === 0) {
+      newErrors.images = "At least one product image is required";
     }
 
     setErrors(newErrors);
@@ -123,16 +157,18 @@ export const ProductForm = ({
 
     try {
       setUploading(true);
-      let imageUrl = formData.image;
+      const imageUrls: string[] = [...existingImages];
 
-      // Upload image to Cloudinary if a new file is selected
-      if (selectedFile) {
+      if (selectedFiles.length > 0) {
         try {
-          imageUrl = await uploadProductImage(selectedFile);
+          for (const file of selectedFiles) {
+            const url = await uploadProductImage(file);
+            imageUrls.push(url);
+          }
         } catch (error) {
           toast({
             title: "Image upload failed",
-            description: "Failed to upload image. Please try again.",
+            description: "Failed to upload images. Please try again.",
             variant: "destructive",
           });
           setUploading(false);
@@ -142,7 +178,9 @@ export const ProductForm = ({
 
       const productData = {
         ...formData,
-        image: imageUrl,
+        image_urls: imageUrls,
+        // Keep backward compatibility
+        image: imageUrls[0] || "",
       };
 
       onSubmit(productData);
@@ -168,55 +206,66 @@ export const ProductForm = ({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="image">Product Image</Label>
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted border-2 border-dashed">
-                {imagePreview ? (
+            <Label htmlFor="images">Product Images * (Max {MAX_IMAGES})</Label>
+
+            <div className="grid grid-cols-3 gap-3">
+              {imagePreviews.map((preview, index) => (
+                <div
+                  key={index}
+                  className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted border-2"
+                >
                   <img
-                    src={imagePreview}
-                    alt="Preview"
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    No image
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <Label
-                  htmlFor="image-upload"
-                  className="flex items-center gap-2 cursor-pointer"
-                >
                   <Button
                     type="button"
-                    variant="outline"
-                    className="gap-2"
-                    asChild
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={() => handleRemoveImage(index)}
                   >
-                    <span>
-                      <Upload className="h-4 w-4" />
-                      Upload Image
-                    </span>
+                    <X className="h-4 w-4" />
                   </Button>
+                  {index === 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-primary/80 text-primary-foreground text-xs text-center py-1">
+                      Main Image
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add Image Button */}
+              {imagePreviews.length < MAX_IMAGES && (
+                <Label
+                  htmlFor="images-upload"
+                  className="w-full aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  <Upload className="h-6 w-6" />
+                  <span className="text-xs">Add Image</span>
+                  <span className="text-xs">
+                    {imagePreviews.length}/{MAX_IMAGES}
+                  </span>
                 </Label>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  Recommended: Square image, at least 500x500px
-                </p>
-                {errors.image && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.image}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
+
+            <input
+              id="images-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+            <p className="text-xs text-muted-foreground">
+              Upload 1-{MAX_IMAGES} images. The first image will be the main
+              product image.
+            </p>
+            {errors.images && (
+              <p className="text-sm text-destructive">{errors.images}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -310,7 +359,7 @@ export const ProductForm = ({
               {uploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {selectedFile ? "Uploading..." : "Saving..."}
+                  {selectedFiles.length > 0 ? "Uploading..." : "Saving..."}
                 </>
               ) : product ? (
                 "Update Product"

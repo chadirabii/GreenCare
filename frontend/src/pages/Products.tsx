@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { getProducts, type Product } from "@/services/productService";
+import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 
 const CATEGORIES = ["all", "plants", "medicines", "tools", "fertilizers"];
 
@@ -79,7 +80,7 @@ const Products = () => {
               Browse and discover agricultural products
             </p>
           </div>
-          {user && (
+          {user && user.role === "seller" && (
             <Button onClick={() => navigate("/my-products")} className="gap-2">
               <Plus className="h-4 w-4" />
               Sell Product
@@ -125,47 +126,50 @@ const Products = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="group cursor-pointer"
-                onClick={() => navigate(`/products/${product.id}`)}
-              >
-                <div className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-shadow">
-                  <div className="aspect-square overflow-hidden bg-muted">
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            {filteredProducts.map((product, index) => {
+              const fallbackImage = product.image || "/placeholder.svg";
+
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="group cursor-pointer"
+                  onClick={() => navigate(`/products/${product.id}`)}
+                >
+                  <div className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-shadow">
+                    <ProductImageCarousel
+                      images={product.images}
+                      fallbackImage={fallbackImage}
+                      productName={product.name}
+                      autoPlayInterval={5000}
                     />
-                  </div>
-                  <div className="p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <span className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary whitespace-nowrap">
-                        {product.category}
-                      </span>
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold line-clamp-1">
+                          {product.name}
+                        </h3>
+                        <span className="text-sm px-2 py-1 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                          {product.category}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xl font-bold text-primary">
+                          ${product.price}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {product.owner_name}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xl font-bold text-primary">
-                        ${product.price}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {product.owner_name}
-                      </span>
-                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </motion.div>
