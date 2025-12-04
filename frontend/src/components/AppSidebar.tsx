@@ -35,9 +35,10 @@ const menuSections = [
   {
     title: "Farm Management",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Plants", url: "/plants", icon: Sprout },
-      { title: "Crop History", url: "/crop-history", icon: History },
+      { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+      { title: 'Plants', url: '/plants', icon: Sprout },
+      { title: 'Plants Watering', url: '/watering', icon: Sprout },
+      { title: 'Crop History', url: '/crop-history', icon: History },
     ],
   },
   {

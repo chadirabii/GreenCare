@@ -33,7 +33,9 @@ SECRET_KEY = 'django-insecure-_v0e9(m4dg-z(w-u9h_038^d1tmbu82+^_!m+azhzxgt3y*0yy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# During local development allow local hosts; change this for production
 ALLOWED_HOSTS = [
+    '*',
     '127.0.0.1',
     'localhost',
     'testserver',
@@ -74,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'Backend.urls'
@@ -199,7 +202,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "http://192.168.1.148:8081",
+    "http://127.0.0.1:8081",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -207,7 +212,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "http://192.168.1.148:8081",
+    "http://127.0.0.1:8081",
 ]
 
 # Allow CSRF cookie to be sent in cross-origin requests
@@ -231,3 +238,6 @@ cloudinary.config(
 
 # Default file storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# URL pour accéder aux fichiers statiques
+STATIC_URL = '/static/'
