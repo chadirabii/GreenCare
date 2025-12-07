@@ -1,8 +1,0 @@
-- hosts: local
-  tasks:
-    - name: Check module version
-      community.docker.docker_image:
-        name: test
-        state: present
-        source: pull
-
