@@ -23,6 +23,7 @@ import Irrigation from "./pages/Irrigation";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Watering from "./pages/Watering";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
