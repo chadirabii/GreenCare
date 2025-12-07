@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from authentication.permissions import IsSellerOrReadOnly, IsSeller
 from .models import Product
 from .serializers import ProductSerializer
 import cloudinary.uploader
@@ -10,11 +11,25 @@ import cloudinary.uploader
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    # Temporarily allow all operations without auth for development
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # Disable CSRF for this viewset during development
-    authentication_classes = []
+    def get_permissions(self):
+        """
+        Set custom permissions based on action
+        """
+        if self.action in ['create', 'upload_image']:
+            # Only sellers can create products and upload images
+            return [IsAuthenticated(), IsSeller()]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            # Only owners can update/delete their products
+            return [IsAuthenticated()]
+        elif self.action == 'my_products':
+            # Only authenticated users can view their products
+            return [IsAuthenticated()]
+        else:
+            # Everyone can list and view products
+            return [IsAuthenticatedOrReadOnly()]
+
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -30,29 +45,32 @@ class ProductViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        # TODO: Re-enable when auth is connected
-        # For now, create products without owner for development
-        if self.request.user.is_authenticated:
-            serializer.save(owner=self.request.user)
-        else:
-            # Skip owner requirement for mock auth development
-            serializer.save()
+        """Automatically set the owner to the current user"""
+        serializer.save(owner=self.request.user)
 
-    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def perform_update(self, serializer):
+        """Only allow users to update their own products"""
+        product = self.get_object()
+        if product.owner != self.request.user:
+            raise PermissionDenied("You can only update your own products")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """Only allow users to delete their own products"""
+        if instance.owner != self.request.user:
+            raise PermissionDenied("You can only delete your own products")
+        instance.delete()
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_products(self, request):
-        # TODO: Re-enable authentication when auth is connected
-        # For now, return all products for development
-        if request.user.is_authenticated:
-            products = Product.objects.filter(owner=request.user)
-        else:
-            # Return all products for mock auth development
-            products = Product.objects.all()
+        """Get products owned by the current user (sellers only)"""
+        products = Product.objects.filter(owner=request.user)
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsSeller])
     def upload_image(self, request):
-        """Upload image to Cloudinary and return the URL"""
+        """Upload image to Cloudinary and return the URL (sellers only)"""
         try:
             image_file = request.FILES.get('image')
             if not image_file:

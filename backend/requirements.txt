@@ -13,4 +13,6 @@ python-dotenv
 requests==2.31.0
 djangorestframework-simplejwt
 gunicorn
-whitenoise==6.11.0
+pytest
+pytest-django
+whitenoise

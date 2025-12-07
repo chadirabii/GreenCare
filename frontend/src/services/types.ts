@@ -2,6 +2,15 @@
 // Type Definitions for API Models
 // ==========================================
 
+// Product Image Types
+export interface ProductImage {
+  id: string;
+  image_url: string;
+  public_id?: string;
+  order: number;
+  created_at: string;
+}
+
 // Product Types
 export interface Product {
   id: string;
@@ -10,6 +19,7 @@ export interface Product {
   price: number;
   category: string;
   image: string;
+  images: ProductImage[];
   owner: string;
   owner_name: string;
   owner_email: string;
@@ -22,46 +32,62 @@ export interface ProductCreateUpdate {
   description: string;
   price: number;
   category: string;
-  image: string;
+  image?: string;
+  image_urls?: string[];
 }
 
 // User Types
 export interface User {
   id: string;
-  username: string;
   email: string;
   first_name: string;
   last_name: string;
+  role: "admin" | "farmer" | "plant_owner" | "seller";
   profile_picture?: string;
+  created_at?: string;
 }
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterData {
-  username: string;
-  password: string;
   first_name: string;
   last_name: string;
   email: string;
+  password: string;
   profile_picture?: string;
-  role?: string;
+  role?: "admin" | "farmer" | "plant_owner" | "seller";
+}
+
+export interface AuthResponse {
+  message: string;
+  access: string;
+  refresh: string;
+  user: User;
 }
 
 // Plant Types
 export interface Plant {
-  id: string;
+  id: number;
   name: string;
-  scientific_name: string;
+  species: string;
+  age: number;
+  height: number;
+  width: number;
   description: string;
-  care_level: string;
-  water_frequency: string;
-  sunlight: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
+  image?: string;
+}
+
+export interface PlantCreateUpdate {
+  name: string;
+  species: string;
+  age: number;
+  height: number;
+  width: number;
+  description: string;
+  image?: File | string;
 }
 
 // API Response Types

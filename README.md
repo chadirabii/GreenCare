@@ -54,6 +54,11 @@ npm install
 
 ```bash
 cd backend
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
 ```
 
 2. Follow backend-specific setup instructions in the backend directory.
@@ -71,7 +76,7 @@ cd frontend
 2. Start the development server:
 
 ```bash
-npm run dev
+npm run dev --port:8080
 ```
 
 The application will be available at `http://localhost:8080` by default.

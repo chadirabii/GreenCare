@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { initializeCSRF } from "@/services/api";
+import { RoleBasedRoute } from "@/components/RoleBasedRoute";
+import { PublicRoute } from "@/components/PublicRoute";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -37,11 +38,6 @@ const ScrollToTop = () => {
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  useEffect(() => {
-    // Initialize CSRF token when app loads
-    initializeCSRF();
-  }, []);
-
   return (
     <>
       <ScrollToTop />
@@ -49,7 +45,14 @@ const AppContent = () => {
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/auth"
+          element={
+            <PublicRoute>
+              <Auth />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={
@@ -94,7 +97,9 @@ const AppContent = () => {
           path="/my-products"
           element={
             <ProtectedRoute>
-              <MyProducts />
+              <RoleBasedRoute allowedRoles={["seller"]}>
+                <MyProducts />
+              </RoleBasedRoute>
             </ProtectedRoute>
           }
         />
@@ -102,7 +107,9 @@ const AppContent = () => {
           path="/my-sales"
           element={
             <ProtectedRoute>
-              <MySales />
+              <RoleBasedRoute allowedRoles={["seller"]}>
+                <MySales />
+              </RoleBasedRoute>
             </ProtectedRoute>
           }
         />
@@ -130,6 +137,7 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/history/:id" element={<ProtectedRoute><HistoryDetails /></ProtectedRoute>} />
         <Route
           path="/profile"
           element={

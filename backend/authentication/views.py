@@ -105,10 +105,6 @@ def logout_view(request):
     Logout user by invalidating the refresh token
     """
     try:
-        refresh_token = request.data.get("refresh_token")
-        if refresh_token:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
         logout(request)
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
     except Exception as e:
