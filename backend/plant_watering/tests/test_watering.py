@@ -1,7 +1,8 @@
 # plant_watering/tests/test_watering.py
 import pytest
 from datetime import datetime, timedelta
-from plant_watering.models import Plants, PlantWatering
+from plant_watering.models import PlantWatering
+from plants.models import Plants
 from django.utils.timezone import make_aware
 
 
