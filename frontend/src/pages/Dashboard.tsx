@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Sprout, History, Droplets, Scan, Cloud, Thermometer, Droplet, Wind } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/AppLayout';
+import { useState, useEffect } from 'react';
+import { getWeather } from "@/services/wateringService";
 
 const quickActions = [
   { title: 'Plants', icon: Sprout, url: '/plants', color: 'text-green-600' },
@@ -11,14 +13,43 @@ const quickActions = [
   { title: 'Disease Detection', icon: Scan, url: '/disease-detection', color: 'text-purple-600' },
 ];
 
-const weatherData = {
-  temp: 24,
-  humidity: 65,
-  rainfall: 12,
-  wind: 8,
-};
+
 
 const Dashboard = () => {
+  const [weatherData, setWeatherData] = useState({
+    temp: 0,
+    humidity: 0,
+    rainfall: 0,
+    wind: 0,
+  });
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const data = await getWeather();
+        console.log('Weather data received:', data);
+        if (data) {
+          setWeatherData({
+            temp: data.temperature_max?.[0] || 0,
+            humidity: data.relative_humidity_max?.[0] || 0,
+            rainfall: data.precipitation?.[0] || 0,
+            wind: data.windspeed_max?.[0] || 0,
+          });
+          console.log('Weather state updated:', {
+            temp: data.temperature_max?.[0] || 0,
+            humidity: data.relative_humidity_max?.[0] || 0,
+            rainfall: data.precipitation?.[0] || 0,
+            wind: data.windspeed_max?.[0] || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Error in fetchWeather:', error);
+      }
+    };
+
+    fetchWeather();
+  }, []);
+
   return (
     <AppLayout>
       <motion.div

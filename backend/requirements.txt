@@ -12,3 +12,4 @@ django-cors-headers
 python-dotenv
 requests==2.31.0
 djangorestframework-simplejwt
+gunicorn

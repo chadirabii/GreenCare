@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .services import WeatherService
 
-
+ #CRUD logic actually lives
 class PlantWateringViewSet(viewsets.ModelViewSet):
     queryset = PlantWatering.objects.all()
     serializer_class = PlantWateringSerializer
@@ -36,12 +36,16 @@ class PlantWateringViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    @action(detail=False, methods=['GET'])
-    def weather_forecast(self, request):
+    
+    
         """
         Get weather forecast and watering recommendations
-        GET /api/plant-watering/weather_forecast/
+        GET /api/watering/weather_forecast/
         """
+    @action(detail=False, methods=['GET'])
+    def weather_forecast(self, request):
+        
+        
         weather_data = WeatherService.get_weather_forecast()
         if weather_data is None:
             return Response(
@@ -61,3 +65,6 @@ class PlantWateringViewSet(viewsets.ModelViewSet):
             )
 
         return Response(weather_data)
+
+
+

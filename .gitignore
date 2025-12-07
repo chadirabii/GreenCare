@@ -27,3 +27,8 @@ backend/.env
 
 # VSCode
 .vscode/
+
+# Tests
+**/tests/
+
+
