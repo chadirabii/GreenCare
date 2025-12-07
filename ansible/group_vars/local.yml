@@ -1,0 +1,26 @@
+---
+# Project paths
+project_root: "{{ playbook_dir }}/../.."
+backend_path: "{{ project_root }}/backend"
+frontend_path: "{{ project_root }}/frontend"
+k8s_manifests_path: "{{ project_root }}/k8s"
+
+# Image configuration
+backend_image_name: my-django-app
+frontend_image_name: my-react-app
+image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('latest', true) }}"
+
+# Minikube configuration
+minikube_profile: minikube
+
+# Kubernetes namespace
+k8s_namespace: default
+
+# Deployment strategy
+deployment_strategy: RollingUpdate
+force_redeploy: true
+
+# Default deployment names
+project_deployments:
+  - backend-deployment
+  - frontend-deployment

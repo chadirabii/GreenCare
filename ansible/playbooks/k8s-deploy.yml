@@ -1,0 +1,7 @@
+---
+- name: Deploy to Kubernetes
+  hosts: local
+  gather_facts: no
+  
+  roles:
+    - k8s-deploy
