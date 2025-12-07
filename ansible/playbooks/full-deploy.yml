@@ -1,0 +1,24 @@
+---
+- name: Full Build and Deploy Pipeline
+  hosts: local
+  gather_facts: no
+  
+  roles:
+    - build-images
+    - load-images
+    - k8s-deploy
+
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=========================================="
+          - "✓ Full deployment completed successfully!"
+          - "=========================================="
+          - "Images built: {{ backend_image_name }}:{{ image_tag }}, {{ frontend_image_name }}:{{ image_tag }}"
+          - "Loaded to Minikube: {{ minikube_profile }}"
+          - "Deployed to namespace: {{ k8s_namespace }}"
+          - ""
+          - "Check services with:"
+          - "  kubectl get all -n {{ k8s_namespace }}"
+          - "  minikube service list -n {{ k8s_namespace }}"

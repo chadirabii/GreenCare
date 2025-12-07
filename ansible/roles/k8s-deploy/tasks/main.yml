@@ -1,0 +1,86 @@
+---
+- name: Check kubectl availability
+  command: kubectl version --client
+  register: kubectl_check
+  changed_when: false
+  failed_when: kubectl_check.rc != 0
+
+- name: Set kubectl context to Minikube
+  command: kubectl config use-context {{ minikube_profile }}
+  changed_when: false
+
+- name: Create namespace if it doesn't exist
+  shell: kubectl create namespace {{ k8s_namespace }} --dry-run=client -o yaml | kubectl apply -f -
+  changed_when: false
+  when: k8s_namespace != "default"
+
+- name: Find all Kubernetes manifest files
+  find:
+    paths: "{{ k8s_manifests_path }}"
+    patterns: "*.yaml,*.yml"
+    recurse: yes
+  register: k8s_manifest_files
+
+- name: Display manifests to be applied
+  debug:
+    msg: "Found {{ k8s_manifest_files.files | length }} manifest files"
+
+- name: Apply Kubernetes manifests
+  shell: kubectl apply -f "{{ item.path }}" -n {{ k8s_namespace }}
+  loop: "{{ k8s_manifest_files.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  register: apply_result
+  changed_when: "'configured' in apply_result.stdout or 'created' in apply_result.stdout"
+
+- name: Display applied manifests
+  debug:
+    msg: "✓ Applied: {{ item.item.path | basename }} - {{ item.stdout_lines | join(', ') }}"
+  loop: "{{ apply_result.results }}"
+  loop_control:
+    label: "{{ item.item.path | basename }}"
+
+- name: Force restart project deployments (if force_redeploy is true)
+  command: kubectl rollout restart deployment/{{ item }} -n {{ k8s_namespace }}
+  loop: "{{ project_deployments }}"
+  when: force_redeploy | bool
+  register: rollout_result
+  changed_when: "'restarted' in rollout_result.stdout"
+  failed_when: false
+
+- name: Wait for project deployments to be ready
+  command: kubectl rollout status deployment/{{ item }} -n {{ k8s_namespace }} --timeout=300s
+  loop: "{{ project_deployments }}"
+  register: rollout_status
+  changed_when: false
+  failed_when: false
+
+- name: Display rollout status
+  debug:
+    msg: "{{ item.item }}: {{ 'Ready ✓' if item.rc == 0 else 'Warning: ' + (item.stderr | default('Check pod status')) }}"
+  loop: "{{ rollout_status.results }}"
+  when: rollout_status.results is defined
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Get all resources in namespace
+  command: kubectl get all -n {{ k8s_namespace }}
+  register: all_resources
+  changed_when: false
+
+- name: Display deployment status
+  debug:
+    msg:
+      - "=========================================="
+      - "✓ Deployment Complete"
+      - "=========================================="
+      - "Namespace: {{ k8s_namespace }}"
+      - "Backend Image: {{ backend_image_name }}:{{ image_tag }}"
+      - "Frontend Image: {{ frontend_image_name }}:{{ image_tag }}"
+      - ""
+      - "Resources:"
+      - "{{ all_resources.stdout_lines }}"
+      - ""
+      - "Access your services:"
+      - "  Backend: minikube service backend-service -n {{ k8s_namespace }}"
+      - "  Frontend: minikube service frontend-service -n {{ k8s_namespace }}"
