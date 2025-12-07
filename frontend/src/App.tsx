@@ -137,6 +137,7 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/history/:id" element={<ProtectedRoute><HistoryDetails /></ProtectedRoute>} />
         <Route
           path="/profile"
           element={
