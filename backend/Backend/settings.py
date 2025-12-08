@@ -206,6 +206,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://192.168.1.148:8081",
     "http://127.0.0.1:8081",
+    "http://frontend.local",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -216,6 +217,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "http://192.168.1.148:8081",
     "http://127.0.0.1:8081",
+    "http://frontend.local",
 ]
 
 # Allow CSRF cookie to be sent in cross-origin requests
