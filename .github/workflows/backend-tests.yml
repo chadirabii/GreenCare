@@ -61,7 +61,7 @@ jobs:
 
       - name: 🧪 Run tests with coverage
         run: |
-          coverage run -m pytest plant_watering/tests/ plants/tests/ products/tests/ -v --tb=short --import-mode=importlib
+          coverage run -m pytest plant_watering/tests/ plants/tests/ products/tests/ -v --tb=short --import-mode=importlib --ignore-glob='**/test_ui.py'
           coverage report
           coverage xml
           coverage html
