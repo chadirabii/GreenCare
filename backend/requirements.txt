@@ -15,4 +15,5 @@ djangorestframework-simplejwt
 gunicorn
 pytest
 pytest-django
+pytest-cov
 whitenoise
