@@ -1,0 +1,38 @@
+---
+- name: Check Docker availability
+  command: docker --version
+  register: docker_check
+  changed_when: false
+  failed_when: docker_check.rc != 0
+
+- name: Build Backend Docker Image
+  community.docker.docker_image:
+    name: "{{ backend_image_name }}"
+    tag: "{{ image_tag }}"
+    source: build
+    build:
+      path: "{{ backend_path }}"
+      dockerfile: Dockerfile
+      pull: yes
+    state: present
+    force_source: yes
+  register: backend_build
+
+- name: Build Frontend Docker Image
+  community.docker.docker_image:
+    name: "{{ frontend_image_name }}"
+    tag: "{{ image_tag }}"
+    source: build
+    build:
+      path: "{{ frontend_path }}"
+      dockerfile: Dockerfile
+      pull: yes
+    state: present
+    force_source: yes
+  register: frontend_build
+
+- name: Display build results
+  debug:
+    msg:
+      - "✓ Backend: {{ backend_image_name }}:{{ image_tag }}"
+      - "✓ Frontend: {{ frontend_image_name }}:{{ image_tag }}"
