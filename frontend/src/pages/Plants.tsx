@@ -341,7 +341,7 @@ const Plants = () => {
             <p className="text-muted-foreground">No plants found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div id="plant-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPlants.map((plant, index) => (
               <motion.div
                 key={plant.id}

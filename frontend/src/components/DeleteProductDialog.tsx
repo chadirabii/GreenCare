@@ -34,7 +34,7 @@ export const DeleteProductDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogAction id='deleteC' onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

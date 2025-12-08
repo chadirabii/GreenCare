@@ -272,6 +272,7 @@ export const ProductForm = ({
             <Label htmlFor="name">Product Name *</Label>
             <Input
               id="name"
+              name="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -287,6 +288,7 @@ export const ProductForm = ({
             <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
+              name="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -304,6 +306,7 @@ export const ProductForm = ({
               <Label htmlFor="price">Price ($) *</Label>
               <Input
                 id="price"
+                name="price"
                 type="number"
                 step="0.01"
                 min="0"
@@ -324,6 +327,7 @@ export const ProductForm = ({
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select
+              name="category"
                 value={formData.category}
                 onValueChange={(value) =>
                   setFormData({ ...formData, category: value })
