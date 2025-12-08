@@ -1,0 +1,182 @@
+# ========================================
+# COMMANDES DE TESTS - GREENCARE BACKEND
+# ========================================
+
+# Navigation vers le répertoire backend
+cd c:\Users\chadi\Desktop\a\GreenCare\backend
+
+# Activation de l'environnement virtuel
+.\env\Scripts\activate
+
+
+# ========================================
+# TESTS UNITAIRES
+# ========================================
+
+# Plants - Tests Unitaires (22 tests)
+Plants Unit Tests: pytest plants/tests/test_plants_unit.py -v
+
+# Products - Tests Unitaires (31 tests)
+Products Unit Tests: pytest products/tests/test_products_unit.py -v
+
+# Plant Watering - Tests Unitaires (4 tests)
+Plant Watering Unit Tests: pytest plant_watering/tests/test_watering.py -v
+
+
+# ========================================
+# TESTS D'INTÉGRATION
+# ========================================
+
+# Plants - Tests d'Intégration (12 tests)
+Plants Integration Tests: pytest plants/tests/test_plants_integration.py -v
+
+# Products - Tests d'Intégration (8 tests)
+Products Integration Tests: pytest products/tests/test_products_integration.py -v
+
+# Plant Watering - Tests d'Intégration (7 tests)
+Plant Watering Integration Tests: pytest plant_watering/tests/test_watering_integration.py -v
+
+
+# ========================================
+# TOUS LES TESTS PAR MODULE
+# ========================================
+
+# Plants - Tous les tests (34 tests)
+Plants All Tests: pytest plants/tests/ -v
+
+# Products - Tous les tests (39 tests)
+Products All Tests: pytest products/tests/ -v
+
+# Plant Watering - Tous les tests (11 tests)
+Plant Watering All Tests: pytest plant_watering/tests/ -v
+
+# Tous les tests du backend (84 tests)
+All Backend Tests: pytest -v
+
+
+# ========================================
+# COUVERTURE DE CODE - DÉTAILLÉE
+# ========================================
+
+# Plants - Couverture avec lignes manquantes
+Plants Coverage Detailed: pytest plants/tests/ --cov=plants --cov-report=term-missing -v
+
+# Products - Couverture avec lignes manquantes
+Products Coverage Detailed: pytest products/tests/ --cov=products --cov-report=term-missing -v
+
+# Plant Watering - Couverture avec lignes manquantes
+Plant Watering Coverage Detailed: pytest plant_watering/tests/ --cov=plant_watering --cov-report=term-missing -v
+
+
+# ========================================
+# COUVERTURE DE CODE - RAPPORT HTML
+# ========================================
+
+# Plants - Rapport HTML (dans htmlcov/)
+Plants Coverage HTML: pytest plants/tests/ --cov=plants --cov-report=html -v
+
+# Products - Rapport HTML (dans htmlcov_products/)
+Products Coverage HTML: pytest products/tests/ --cov=products --cov-report=html:htmlcov_products -v
+
+# Plant Watering - Rapport HTML (dans htmlcov_plant_watering/)
+Plant Watering Coverage HTML: pytest plant_watering/tests/ --cov=plant_watering --cov-report=html:htmlcov_plant_watering -v
+
+
+# ========================================
+# COUVERTURE DE CODE - FICHIER SPÉCIFIQUE
+# ========================================
+
+# Plants - Rapport de couverture du fichier
+Plants Coverage Report: coverage report --include="plants/*" -m
+
+# Products - Rapport de couverture du fichier
+Products Coverage Report: coverage report --include="products/*" -m
+
+# Plant Watering - Rapport de couverture du fichier
+Plant Watering Coverage Report: coverage report --include="plant_watering/*" -m
+
+
+# ========================================
+# COMMANDES COMBINÉES UTILES
+# ========================================
+
+# Tous les tests avec couverture complète
+All Tests with Coverage: pytest --cov=plants --cov=products --cov=plant_watering --cov-report=term --cov-report=html -v
+
+
+# ========================================
+# NOTES
+# ========================================
+
+# Total des tests: 84
+#   - Plants: 34 (22 unitaires + 12 intégration)
+#   - Products: 39 (31 unitaires + 8 intégration)
+#   - Plant Watering: 11 (4 unitaires + 7 intégration)
+
+# Couverture moyenne: 91%
+#   - Plants: 93%
+#   - Products: 90%
+#   - Plant Watering: 89%
+
+# Pour ouvrir les rapports HTML:
+#   - Plants: htmlcov/index.html
+#   - Products: htmlcov_products/index.html
+#   - Plant Watering: htmlcov_plant_watering/index.html
+
+
+# ========================================
+# SONARQUBE - ANALYSE DE QUALITÉ DU CODE
+# ========================================
+
+# Étape 1: Installer pytest-cov (si pas déjà fait)
+Install pytest-cov: pip install pytest-cov
+
+# Étape 2: Générer le rapport de couverture XML pour SonarQube
+Generate Coverage XML for SonarQube: pytest --cov=plant_watering --cov=plants --cov=products --cov-report=xml --cov-report=html -v
+
+# Étape 3: Installer SonarScanner
+# Windows (avec Chocolatey): choco install sonarscanner
+# Windows (manuel): Télécharger depuis https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner/
+# macOS: brew install sonar-scanner
+# Linux: Télécharger depuis le site officiel
+
+# Étape 4A: Analyser avec SonarCloud (recommandé - gratuit pour projets publics)
+# Configuration requise dans sonar-project.properties:
+#   - sonar.organization=YOUR_ORG
+#   - sonar.projectKey=greencare-backend
+# Commande:
+SonarCloud Analysis: sonar-scanner -Dsonar.login=YOUR_SONARCLOUD_TOKEN
+
+# Étape 4B: Analyser avec SonarQube local
+# Prérequis: Serveur SonarQube en cours d'exécution (localhost:9000)
+SonarQube Local Analysis: sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.login=YOUR_TOKEN
+
+# Étape 5: Voir les résultats
+# SonarCloud: https://sonarcloud.io/dashboard?id=greencare-backend
+# SonarQube local: http://localhost:9000/dashboard?id=greencare-backend
+
+
+# ========================================
+# ANALYSE SONARQUBE - RÉCAPITULATIF
+# ========================================
+
+# Métriques analysées par SonarQube:
+#   - Bugs: Erreurs de code susceptibles de causer des défaillances
+#   - Vulnérabilités: Failles de sécurité potentielles
+#   - Code Smells: Problèmes de maintenabilité du code
+#   - Couverture: Pourcentage de code couvert par les tests
+#   - Duplication: Code dupliqué dans le projet
+#   - Complexité cyclomatique: Complexité des fonctions
+#   - Dette technique: Temps estimé pour corriger les problèmes
+#   - Quality Gate: Statut global (Pass/Fail)
+
+# Modules analysés:
+#   - plant_watering/
+#   - plants/
+#   - products/
+
+# Fichiers exclus de l'analyse:
+#   - Migrations Django (**/migrations/**)
+#   - Fichiers de cache (**/__pycache__/**)
+#   - Environnement virtuel (**/env/**)
+#   - Fichiers de test (pour la duplication)

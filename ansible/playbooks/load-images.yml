@@ -1,0 +1,7 @@
+---
+- name: Load Images to Minikube
+  hosts: local
+  gather_facts: no
+  
+  roles:
+    - load-images

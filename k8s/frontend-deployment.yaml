@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: my-react-app:v2
+        image: my-react-app
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

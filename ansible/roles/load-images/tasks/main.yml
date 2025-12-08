@@ -1,0 +1,38 @@
+---
+- name: Check Minikube status
+  command: minikube status -p {{ minikube_profile }}
+  register: minikube_status
+  changed_when: false
+  failed_when: false
+
+- name: Fail if Minikube is not running
+  fail:
+    msg: "Minikube is not running. Start it with: minikube start"
+  when: "'Running' not in minikube_status.stdout"
+
+- name: Load Backend image to Minikube
+  command: >
+    minikube -p {{ minikube_profile }} image load 
+    {{ backend_image_name }}:{{ image_tag }}
+  register: backend_load
+  changed_when: "'Loaded image' in backend_load.stdout or backend_load.rc == 0"
+
+- name: Load Frontend image to Minikube
+  command: >
+    minikube -p {{ minikube_profile }} image load 
+    {{ frontend_image_name }}:{{ image_tag }}
+  register: frontend_load
+  changed_when: "'Loaded image' in frontend_load.stdout or frontend_load.rc == 0"
+
+- name: Verify images in Minikube
+  command: >
+    minikube -p {{ minikube_profile }} image ls
+  register: minikube_images
+  changed_when: false
+
+- name: Display loaded images
+  debug:
+    msg:
+      - "✓ Images loaded to Minikube:"
+      - "  - {{ backend_image_name }}:{{ image_tag }}"
+      - "  - {{ frontend_image_name }}:{{ image_tag }}"
