@@ -209,6 +209,7 @@ const MyProducts = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            id="view"
                             onClick={() => navigate(`/products/${product.id}`)}
                             className="gap-2"
                           >
@@ -218,6 +219,7 @@ const MyProducts = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            id="edit"
                             onClick={() => handleEditProduct(product)}
                             className="gap-2"
                           >
@@ -227,6 +229,7 @@ const MyProducts = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            id="delete"
                             onClick={() => handleDeleteClick(product)}
                             className="gap-2"
                           >

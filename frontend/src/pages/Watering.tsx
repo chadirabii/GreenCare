@@ -303,6 +303,7 @@ const Watering = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          id="edit"
                           onClick={() => handleEdit(w)}
                         >
                           <Pencil className="h-4 w-4" />
@@ -310,6 +311,7 @@ const Watering = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          id="delete"
                           onClick={() => handleDelete(w.id)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />

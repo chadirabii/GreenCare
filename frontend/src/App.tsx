@@ -24,6 +24,7 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Watering from "./pages/Watering";
+import HistoryDetails from "./pages/HistoryDetails";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
