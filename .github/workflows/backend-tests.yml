@@ -48,7 +48,15 @@ jobs:
           pip install -r requirements.txt
       
       # ============================================
-      # STEP 4: Run Tests with Coverage
+      # STEP 4: Clean Python Cache
+      # ============================================
+      - name: 🧹 Clean Python cache files
+        run: |
+          find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+          find . -type f -name "*.pyc" -delete 2>/dev/null || true
+      
+      # ============================================
+      # STEP 5: Run Tests with Coverage
       # ============================================
 
       - name: 🧪 Run tests with coverage
@@ -61,14 +69,14 @@ jobs:
           DJANGO_SETTINGS_MODULE: Backend.settings
       
       # ============================================
-      # STEP 5: Display Coverage Summary
+      # STEP 6: Display Coverage Summary
       # ============================================
       - name: 📊 Display coverage summary
         run: |
           coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
       
       # ============================================
-      # STEP 6: Upload Coverage Reports
+      # STEP 7: Upload Coverage Reports
       # ============================================
       - name: 📤 Upload coverage reports to Codecov (optional)
         uses: codecov/codecov-action@v4
@@ -79,7 +87,7 @@ jobs:
         continue-on-error: true  # Don't fail if Codecov is not configured
       
       # ============================================
-      # STEP 7: SonarCloud Scan
+      # STEP 8: SonarCloud Scan
       # ============================================
       - name: 🔬 SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -91,7 +99,7 @@ jobs:
         continue-on-error: false  # Fail pipeline if SonarCloud fails
       
       # ============================================
-      # STEP 8: Upload Coverage HTML Report
+      # STEP 9: Upload Coverage HTML Report
       # ============================================
       - name: 📁 Upload HTML coverage report
         uses: actions/upload-artifact@v4
@@ -101,7 +109,7 @@ jobs:
           retention-days: 30
       
       # ============================================
-      # STEP 9: Upload Test Results
+      # STEP 10: Upload Test Results
       # ============================================
       - name: 📋 Upload test results
         uses: actions/upload-artifact@v4
@@ -112,7 +120,7 @@ jobs:
           retention-days: 30
       
       # ============================================
-      # STEP 10: Comment PR with Coverage
+      # STEP 11: Comment PR with Coverage
       # ============================================
       - name: 💬 Comment PR with coverage
         if: github.event_name == 'pull_request'
