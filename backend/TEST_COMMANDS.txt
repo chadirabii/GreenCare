@@ -122,3 +122,61 @@ All Tests with Coverage: pytest --cov=plants --cov=products --cov=plant_watering
 #   - Plants: htmlcov/index.html
 #   - Products: htmlcov_products/index.html
 #   - Plant Watering: htmlcov_plant_watering/index.html
+
+
+# ========================================
+# SONARQUBE - ANALYSE DE QUALITÉ DU CODE
+# ========================================
+
+# Étape 1: Installer pytest-cov (si pas déjà fait)
+Install pytest-cov: pip install pytest-cov
+
+# Étape 2: Générer le rapport de couverture XML pour SonarQube
+Generate Coverage XML for SonarQube: pytest --cov=plant_watering --cov=plants --cov=products --cov-report=xml --cov-report=html -v
+
+# Étape 3: Installer SonarScanner
+# Windows (avec Chocolatey): choco install sonarscanner
+# Windows (manuel): Télécharger depuis https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner/
+# macOS: brew install sonar-scanner
+# Linux: Télécharger depuis le site officiel
+
+# Étape 4A: Analyser avec SonarCloud (recommandé - gratuit pour projets publics)
+# Configuration requise dans sonar-project.properties:
+#   - sonar.organization=YOUR_ORG
+#   - sonar.projectKey=greencare-backend
+# Commande:
+SonarCloud Analysis: sonar-scanner -Dsonar.login=YOUR_SONARCLOUD_TOKEN
+
+# Étape 4B: Analyser avec SonarQube local
+# Prérequis: Serveur SonarQube en cours d'exécution (localhost:9000)
+SonarQube Local Analysis: sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.login=YOUR_TOKEN
+
+# Étape 5: Voir les résultats
+# SonarCloud: https://sonarcloud.io/dashboard?id=greencare-backend
+# SonarQube local: http://localhost:9000/dashboard?id=greencare-backend
+
+
+# ========================================
+# ANALYSE SONARQUBE - RÉCAPITULATIF
+# ========================================
+
+# Métriques analysées par SonarQube:
+#   - Bugs: Erreurs de code susceptibles de causer des défaillances
+#   - Vulnérabilités: Failles de sécurité potentielles
+#   - Code Smells: Problèmes de maintenabilité du code
+#   - Couverture: Pourcentage de code couvert par les tests
+#   - Duplication: Code dupliqué dans le projet
+#   - Complexité cyclomatique: Complexité des fonctions
+#   - Dette technique: Temps estimé pour corriger les problèmes
+#   - Quality Gate: Statut global (Pass/Fail)
+
+# Modules analysés:
+#   - plant_watering/
+#   - plants/
+#   - products/
+
+# Fichiers exclus de l'analyse:
+#   - Migrations Django (**/migrations/**)
+#   - Fichiers de cache (**/__pycache__/**)
+#   - Environnement virtuel (**/env/**)
+#   - Fichiers de test (pour la duplication)
