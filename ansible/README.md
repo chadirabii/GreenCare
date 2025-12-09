@@ -24,9 +24,10 @@ ansible/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker installed and running
 - Minikube installed and running
-- Kubectl installed and configured  
+- Kubectl installed and configured
 - Ansible installed (Python 3.11+)
 
 **Note**: Ansible has compatibility issues on Windows. Use PowerShell to run Docker commands directly or use WSL2 with a proper Linux distribution (Ubuntu).
@@ -34,11 +35,13 @@ ansible/
 ### Install Ansible (if needed)
 
 **Linux/Mac:**
+
 ```bash
 pip install ansible docker
 ```
 
 **Windows (Limited Support):**
+
 ```powershell
 pip install ansible docker pywinrm
 ```
@@ -46,6 +49,7 @@ pip install ansible docker pywinrm
 ## 📝 Available Playbooks
 
 ### 1. Full Deployment Pipeline (Recommended)
+
 Runs all steps in sequence: build → load → deploy.
 
 ```bash
@@ -54,12 +58,14 @@ ansible-playbook playbooks/full-deploy.yml
 ```
 
 **What it does:**
+
 1. Builds Docker images for backend and frontend
 2. Loads images into Minikube
 3. Deploys all manifests to Kubernetes
 4. Displays access information
 
 ### 2. Build Docker Images
+
 Builds both backend (Django) and frontend (React) Docker images.
 
 ```bash
@@ -67,6 +73,7 @@ ansible-playbook playbooks/build-images.yml
 ```
 
 ### 3. Load Images to Minikube
+
 Loads the built images into Minikube's Docker daemon.
 
 ```bash
@@ -74,6 +81,7 @@ ansible-playbook playbooks/load-images.yml
 ```
 
 ### 4. Deploy to Kubernetes
+
 Deploys all Kubernetes manifests to the cluster.
 
 ```bash
@@ -107,6 +115,7 @@ project_deployments:
 Since Ansible has issues on Windows, use these Docker commands directly:
 
 ### Build Images in Minikube
+
 ```powershell
 # Set Minikube Docker environment
 & minikube -p minikube docker-env --shell powershell | Invoke-Expression
@@ -119,6 +128,7 @@ docker build -t my-react-app:latest --build-arg VITE_API_URL=/api ./frontend
 ```
 
 ### Deploy to Kubernetes
+
 ```powershell
 kubectl apply -f ./k8s/
 ```

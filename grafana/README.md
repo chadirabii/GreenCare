@@ -35,7 +35,7 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus-service:9090  # Kubernetes service name
+    url: http://prometheus-service:9090 # Kubernetes service name
     isDefault: true
     editable: true
     jsonData:
@@ -43,6 +43,7 @@ datasources:
 ```
 
 **Key Settings:**
+
 - `access: proxy` - Grafana server proxies requests to Prometheus
 - `url` - Points to Prometheus service in Kubernetes
 - `timeInterval: "5s"` - Default scrape interval
@@ -54,9 +55,9 @@ Configures where Grafana should look for dashboard JSON files.
 ```yaml
 apiVersion: 1
 providers:
-  - name: 'default'
+  - name: "default"
     orgId: 1
-    folder: ''
+    folder: ""
     type: file
     disableDeletion: false
     editable: true
@@ -69,6 +70,7 @@ providers:
 Pre-configured dashboard with panels for Django application monitoring.
 
 **Dashboard Panels Include:**
+
 - HTTP Request Rate
 - HTTP Response Time (p50, p95, p99)
 - HTTP Error Rate
@@ -88,6 +90,7 @@ docker-compose up -d grafana
 ```
 
 Access: http://localhost:3001
+
 - Username: `admin`
 - Password: `admin`
 
@@ -106,6 +109,7 @@ kubectl get pods -l app=grafana
 ```
 
 Access via port-forward:
+
 ```bash
 kubectl port-forward svc/grafana-service 3001:3000
 
@@ -143,26 +147,31 @@ Then open: http://localhost:3001
 ### Example PromQL Queries
 
 **HTTP Request Rate:**
+
 ```promql
 rate(django_http_requests_total_by_method_total[5m])
 ```
 
 **Response Time (95th percentile):**
+
 ```promql
 histogram_quantile(0.95, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m]))
 ```
 
 **Error Rate:**
+
 ```promql
 rate(django_http_requests_total_by_method_total{status=~"5.."}[5m])
 ```
 
 **Database Query Time:**
+
 ```promql
 rate(django_db_query_duration_seconds_sum[5m]) / rate(django_db_query_duration_seconds_count[5m])
 ```
 
 **Active Requests:**
+
 ```promql
 django_http_requests_total_by_transport_total
 ```
@@ -172,24 +181,28 @@ django_http_requests_total_by_transport_total
 ### Pre-configured Dashboard Includes:
 
 1. **Overview Section**
+
    - Total requests per second
    - Average response time
    - Error rate percentage
    - Active connections
 
 2. **HTTP Metrics**
+
    - Request rate by method (GET, POST, etc.)
    - Response time percentiles
    - Status code distribution
    - Requests by endpoint
 
 3. **Database Metrics**
+
    - Query execution time
    - Number of queries
    - Database connections
    - Slow query detection
 
 4. **System Metrics**
+
    - Python memory usage
    - CPU usage
    - Thread count
@@ -224,6 +237,7 @@ data:
 ```
 
 These are mounted into the Grafana pod at:
+
 - `/etc/grafana/provisioning/datasources/`
 - `/etc/grafana/provisioning/dashboards/`
 
@@ -248,6 +262,7 @@ These are mounted into the Grafana pod at:
 ### Method 3: ConfigMap (Kubernetes)
 
 1. Add dashboard JSON to ConfigMap:
+
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -266,19 +281,23 @@ data:
 ## 🔍 Monitoring Best Practices
 
 1. **Set Up Alerts**
+
    - Configure alert rules in dashboard panels
    - Set up notification channels (email, Slack, etc.)
 
 2. **Use Variables**
+
    - Add dashboard variables for filtering (namespace, pod, etc.)
    - Makes dashboards more reusable
 
 3. **Organize Dashboards**
+
    - Group related panels
    - Use rows to organize sections
    - Add helpful descriptions
 
 4. **Performance**
+
    - Use appropriate time ranges
    - Avoid too many panels on one dashboard
    - Use query caching when possible
@@ -303,11 +322,13 @@ kubectl describe pod -l app=grafana
 ### No Data in Dashboard
 
 1. **Check Prometheus is running:**
+
    ```bash
    kubectl get pods -l app=prometheus
    ```
 
 2. **Verify datasource connection:**
+
    - Grafana → Configuration → Data Sources → Prometheus
    - Click "Test" button
 
@@ -319,11 +340,13 @@ kubectl describe pod -l app=grafana
 ### Dashboard Not Loading
 
 1. **Check ConfigMap:**
+
    ```bash
    kubectl describe cm grafana-dashboards-config
    ```
 
 2. **Verify mount in pod:**
+
    ```bash
    kubectl exec -it <grafana-pod> -- ls -la /etc/grafana/provisioning/dashboards/
    ```
@@ -336,11 +359,13 @@ kubectl describe pod -l app=grafana
 ### Can't Login
 
 1. Check environment variables in deployment:
+
    ```bash
    kubectl describe deployment grafana-deployment
    ```
 
 2. Default credentials are set in `grafana-deployment.yaml`:
+
    - `GF_SECURITY_ADMIN_USER=admin`
    - `GF_SECURITY_ADMIN_PASSWORD=admin`
 

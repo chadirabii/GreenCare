@@ -140,6 +140,7 @@ Browser → Frontend (nginx) → /api/* → Backend Service
 ### Configuration
 
 **Frontend ConfigMap** (`frontend-configmap.yaml`):
+
 ```nginx
 location /api/ {
     proxy_pass http://backend-service:8000/api/;
@@ -150,6 +151,7 @@ location /api/ {
 ```
 
 **Frontend Deployment** mounts this configuration:
+
 ```yaml
 volumeMounts:
   - name: nginx-config
@@ -158,6 +160,7 @@ volumeMounts:
 ```
 
 ### Benefits
+
 - ✅ No CORS configuration needed
 - ✅ Works with port-forwarding and service mesh
 - ✅ No hardcoded backend URLs in frontend

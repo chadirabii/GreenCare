@@ -7,15 +7,18 @@ GreenCare is a full-stack application designed to help users manage and care for
 This repository is organized into multiple components with comprehensive documentation:
 
 ### Core Application
+
 - **[Frontend Documentation](./frontend/README.md)** - React/Vite frontend with TypeScript
 - **[Backend Documentation](./backend/README.md)** - Django REST API backend
 
 ### Infrastructure & Deployment
+
 - **[Kubernetes Manifests](./k8s/README.md)** - K8s deployment configurations, services, monitoring
 - **[Ansible Automation](./ansible/README.md)** - Automated build and deployment playbooks
 - **[Grafana Monitoring](./grafana/README.md)** - Dashboard configurations and metrics
 
 ### Quick Start Guide
+
 - **[Port Forwarding Script](./start-services.ps1)** - Access services locally
 - **[Frontend-Backend Connection](./frontend/README-CONNECTION-FIX.md)** - API proxy configuration
 
@@ -91,18 +94,21 @@ kubectl apply -f .
 ```
 
 Then open:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3001
 
 See detailed instructions in:
+
 - [Kubernetes Deployment Guide](./k8s/README.md)
 - [Ansible Automation Guide](./ansible/README.md)
 
 ## 📋 Prerequisites
 
 ### For Local Development
+
 - **Node.js** v18 or higher
 - **Python** 3.11 or higher
 - **Docker** & Docker Compose
@@ -110,6 +116,7 @@ See detailed instructions in:
 - **Code Editor** (VS Code recommended)
 
 ### For Kubernetes Deployment
+
 - **Docker Desktop** with WSL2 (Windows) or Docker (Linux/Mac)
 - **Minikube** v1.36+
 - **kubectl** (Kubernetes CLI)
@@ -166,14 +173,17 @@ python manage.py runserver
 ```
 
 ### Access Django Admin
+
 http://localhost:8000/admin (use superuser credentials)
 
 ### Access API Documentation
+
 http://localhost:8000/api/ (Swagger UI)
 
 ## 🏭 Production Build
 
 ### Frontend Production Build
+
 ```bash
 cd frontend
 npm run build
@@ -181,6 +191,7 @@ npm run build
 ```
 
 ### Docker Build
+
 ```bash
 # Build backend
 docker build -t my-django-app:latest ./backend
@@ -195,6 +206,7 @@ docker-compose build
 ## ✨ Features
 
 ### Frontend
+
 - ⚛️ **React 18** with TypeScript
 - 🎨 **Tailwind CSS** for styling
 - 🧩 **Shadcn UI** component library
@@ -206,6 +218,7 @@ docker-compose build
 - 📦 **Vite** for fast development
 
 ### Backend
+
 - 🐍 **Django 5.x** REST API
 - 🔒 **JWT Authentication** (djangorestframework-simplejwt)
 - 📊 **PostgreSQL** database support
@@ -215,6 +228,7 @@ docker-compose build
 - 🛡️ **Security** best practices
 
 ### Infrastructure
+
 - 🐳 **Docker** & Docker Compose
 - ☸️ **Kubernetes** deployments
 - 🔧 **Ansible** automation
@@ -224,6 +238,7 @@ docker-compose build
 - 🚀 **Multi-stage builds** for optimization
 
 ### Monitoring
+
 - 📊 HTTP request/response metrics
 - 🗄️ Database query performance
 - 💾 Memory & CPU usage
@@ -233,20 +248,21 @@ docker-compose build
 
 ## 🛠️ Technology Stack
 
-| Category | Technologies |
-|----------|-------------|
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Shadcn UI, Axios |
-| **Backend** | Django 5.x, Django REST Framework, Python 3.11+ |
-| **Database** | PostgreSQL (production), SQLite (development) |
-| **Authentication** | JWT (djangorestframework-simplejwt) |
-| **Monitoring** | Prometheus, Grafana, django-prometheus |
-| **Infrastructure** | Docker, Kubernetes, Minikube, Nginx |
-| **Automation** | Ansible |
-| **API Docs** | Swagger (drf-yasg) |
+| Category           | Technologies                                               |
+| ------------------ | ---------------------------------------------------------- |
+| **Frontend**       | React 18, TypeScript, Vite, Tailwind CSS, Shadcn UI, Axios |
+| **Backend**        | Django 5.x, Django REST Framework, Python 3.11+            |
+| **Database**       | PostgreSQL (production), SQLite (development)              |
+| **Authentication** | JWT (djangorestframework-simplejwt)                        |
+| **Monitoring**     | Prometheus, Grafana, django-prometheus                     |
+| **Infrastructure** | Docker, Kubernetes, Minikube, Nginx                        |
+| **Automation**     | Ansible                                                    |
+| **API Docs**       | Swagger (drf-yasg)                                         |
 
 ## 🌟 Architecture
 
 ### Application Architecture
+
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
 │   Browser   │────▶│   Frontend   │────▶│   Backend   │
@@ -270,6 +286,7 @@ docker-compose build
 ```
 
 ### Deployment Architecture
+
 ```
 ┌────────────────────────────────────────────────────────┐
 │                    Kubernetes Cluster                   │
@@ -328,18 +345,23 @@ docker-compose build
 ## 🐛 Troubleshooting
 
 ### Services not accessible
+
 Run the port forwarding script:
+
 ```powershell
 .\start-services.ps1
 ```
 
 ### Frontend can't reach backend
+
 See [Frontend-Backend Connection Guide](./frontend/README-CONNECTION-FIX.md)
 
 ### Kubernetes deployment issues
+
 See [Kubernetes Troubleshooting](./k8s/README.md#troubleshooting)
 
 ### Docker build failures
+
 See [Ansible Troubleshooting](./ansible/README.md#troubleshooting)
 
 ## 📄 License
