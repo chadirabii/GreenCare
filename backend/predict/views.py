@@ -134,7 +134,21 @@ class DetectionResultViewSet(viewsets.ViewSet):
             groq_raw_response_str = None
 
             if status_label == "diseased":
-                prompt = f"Give clear, short treatment steps for this plant disease: {disease_name}."
+                prompt = prompt = f"""
+    You are an expert plant pathologist.
+
+    The detected plant disease is: **{disease_name}**.
+
+    Provide a structured treatment guide with:
+
+    1. Cause of the disease
+    2. Symptoms
+    3. Immediate actions (remove leaves, isolate plant)
+    4. Recommended organic treatments
+    5. Recommended chemical treatments (safe dosage)
+    6. Preventive measures
+    7. Expected results timeline
+    """
 
                 try:
                     groq_response = groq_client.responses.create(
