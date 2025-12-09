@@ -342,31 +342,6 @@ docker-compose build
 - **[Frontend Connection Fix](./frontend/README-CONNECTION-FIX.md)** - API proxy setup
 - **[Port Forwarding Script](./start-services.ps1)** - Local access helper
 
-## 🐛 Troubleshooting
-
-### Services not accessible
-
-Run the port forwarding script:
-
-```powershell
-.\start-services.ps1
-```
-
-### Frontend can't reach backend
-
-See [Frontend-Backend Connection Guide](./frontend/README-CONNECTION-FIX.md)
-
-### Kubernetes deployment issues
-
-See [Kubernetes Troubleshooting](./k8s/README.md#troubleshooting)
-
-### Docker build failures
-
-See [Ansible Troubleshooting](./ansible/README.md#troubleshooting)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Authors
 
