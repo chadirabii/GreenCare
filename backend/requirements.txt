@@ -93,3 +93,4 @@ pytest
 pytest-django
 pytest-cov
 whitenoise
+django-prometheus
