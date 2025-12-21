@@ -333,7 +333,7 @@ class ProductViewSetTest(APITestCase):
         }
         self.client.force_authenticate(user=self.seller)
         url = reverse('product-upload-image')
-        
+
         # Create a mock file
         from io import BytesIO
         from PIL import Image
@@ -342,8 +342,9 @@ class ProductViewSetTest(APITestCase):
         image.save(image_file, 'JPEG')
         image_file.seek(0)
         image_file.name = 'test.jpg'
-        
-        response = self.client.post(url, {'image': image_file}, format='multipart')
+
+        response = self.client.post(
+            url, {'image': image_file}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('image_url', response.data)
 
@@ -367,7 +368,7 @@ class ProductViewSetTest(APITestCase):
         mock_upload.side_effect = Exception('Cloudinary error')
         self.client.force_authenticate(user=self.seller)
         url = reverse('product-upload-image')
-        
+
         from io import BytesIO
         from PIL import Image
         image = Image.new('RGB', (100, 100))
@@ -375,9 +376,11 @@ class ProductViewSetTest(APITestCase):
         image.save(image_file, 'JPEG')
         image_file.seek(0)
         image_file.name = 'test.jpg'
-        
-        response = self.client.post(url, {'image': image_file}, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        response = self.client.post(
+            url, {'image': image_file}, format='multipart')
+        self.assertEqual(response.status_code,
+                         status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class OrderViewSetTest(APITestCase):
@@ -530,7 +533,8 @@ class OrderViewSetTest(APITestCase):
         data = {'status': 'processing'}
         response = self.client.post(url, data)
         # Due to queryset filtering, buyer cannot access update_status endpoint for seller's view
-        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
+        self.assertIn(response.status_code, [
+                      status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
 
     def test_update_order_invalid_status(self):
         """Test updating order with invalid status"""
@@ -567,7 +571,8 @@ class OrderViewSetTest(APITestCase):
         }
         response = self.client.put(url, data)
         # Seller should be able to update status and notes
-        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND])
+        self.assertIn(response.status_code, [
+                      status.HTTP_200_OK, status.HTTP_404_NOT_FOUND])
 
     def test_update_order_disallowed_field(self):
         """Test updating disallowed order field"""
@@ -587,7 +592,8 @@ class OrderViewSetTest(APITestCase):
         }
         response = self.client.put(url, data)
         # Due to queryset filtering, might get 404 or 400
-        self.assertIn(response.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_404_NOT_FOUND])
+        self.assertIn(response.status_code, [
+                      status.HTTP_400_BAD_REQUEST, status.HTTP_404_NOT_FOUND])
 
     def test_cancel_order_as_buyer(self):
         """Test cancelling order as buyer"""
@@ -642,7 +648,8 @@ class OrderViewSetTest(APITestCase):
         url = reverse('order-detail', kwargs={'pk': order.pk})
         response = self.client.delete(url)
         # Due to queryset filtering, another user won't see this order (404) or get permission denied (403)
-        self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
+        self.assertIn(response.status_code, [
+                      status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
 
     def test_my_orders_endpoint(self):
         """Test my_orders endpoint"""
@@ -789,7 +796,8 @@ class SerializerTest(TestCase):
         )
         serializer = ProductSerializer(product)
         self.assertEqual(serializer.data['owner_name'], 'Anonymous')
-        self.assertEqual(serializer.data['owner_email'], 'no-email@example.com')
+        self.assertEqual(
+            serializer.data['owner_email'], 'no-email@example.com')
 
     def test_product_serializer_create_with_image_urls(self):
         """Test creating product with image URLs"""
@@ -835,7 +843,8 @@ class SerializerTest(TestCase):
         self.assertTrue(serializer.is_valid())
         product = serializer.save()
         self.assertEqual(product.images.count(), 2)
-        self.assertFalse(product.images.filter(image_url='https://example.com/old.jpg').exists())
+        self.assertFalse(product.images.filter(
+            image_url='https://example.com/old.jpg').exists())
 
     def test_order_serializer_validation_insufficient_stock(self):
         """Test order serializer validates stock"""
