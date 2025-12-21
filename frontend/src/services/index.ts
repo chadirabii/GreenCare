@@ -15,6 +15,8 @@ export type {
   Plant,
   ApiResponse,
   ApiError,
+  Order,
+  OrderCreateUpdate,
 } from "./types";
 
 // Product Service
@@ -27,6 +29,17 @@ export {
   deleteProduct,
   uploadProductImage,
 } from "./productService";
+
+// Order Service
+export {
+  getMyOrders,
+  getMySales,
+  getOrder,
+  createOrder,
+  updateOrderStatus,
+  cancelOrder,
+  updateOrderNotes,
+} from "./orderService";
 
 // Authentication Service
 export { login, register, logout, getCurrentUser } from "./authService";

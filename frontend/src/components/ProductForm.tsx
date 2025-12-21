@@ -27,6 +27,7 @@ interface Product {
   description: string;
   price: number;
   category: string;
+  stock_quantity?: number;
   image?: string;
   images?: ProductImage[];
 }
@@ -53,6 +54,7 @@ export const ProductForm = ({
     description: "",
     price: 0,
     category: "plants",
+    stock_quantity: 0,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -76,6 +78,7 @@ export const ProductForm = ({
         description: "",
         price: 0,
         category: "plants",
+        stock_quantity: 0,
       });
       setImagePreviews([]);
       setSelectedFiles([]);
@@ -325,9 +328,34 @@ export const ProductForm = ({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="stock_quantity">Stock Quantity *</Label>
+              <Input
+                id="stock_quantity"
+                name="stock_quantity"
+                type="number"
+                min="0"
+                value={formData.stock_quantity || 0}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    stock_quantity: parseInt(e.target.value) || 0,
+                  })
+                }
+                placeholder="0"
+              />
+              {errors.stock_quantity && (
+                <p className="text-sm text-destructive">
+                  {errors.stock_quantity}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select
-              name="category"
+                name="category"
                 value={formData.category}
                 onValueChange={(value) =>
                   setFormData({ ...formData, category: value })

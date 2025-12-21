@@ -108,15 +108,10 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQL_DATABASE'),  # Database name
-        'USER': os.getenv('MYSQL_USER'),  # Your MySQL username
-        'PASSWORD': os.getenv('MYSQL_PASSWORD'),  # Your MySQL password
-        'HOST': os.getenv('MYSQL_HOST'),  # MySQL server address (localhost if local)
-        'PORT': os.getenv('MYSQL_PORT'),  # MySQL default port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 
 # Password validation
@@ -181,7 +176,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    
+
     'ROTATE_REFRESH_TOKENS': True,  # Create new refresh token when refreshing
     'ALGORITHM': 'HS256',
     'AUTH_HEADER_TYPES': ('Bearer',),

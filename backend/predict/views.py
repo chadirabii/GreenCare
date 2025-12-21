@@ -184,6 +184,9 @@ class DetectionResultViewSet(viewsets.ViewSet):
 
                     if not recommendations:
                         recommendations = ["Failed to get recommendations from AI."]
+                except Exception as groq_error:
+                    print(f"Groq API error: {groq_error}")
+                    recommendations = ["Could not generate AI recommendations at this time."]
 
             # -----------------------------
             # 5) Save to DB

@@ -20,6 +20,7 @@ export interface Product {
   category: string;
   image: string;
   images: ProductImage[];
+  stock_quantity: number;
   owner: string;
   owner_name: string;
   owner_email: string;
@@ -34,6 +35,7 @@ export interface ProductCreateUpdate {
   category: string;
   image?: string;
   image_urls?: string[];
+  stock_quantity?: number;
 }
 
 // User Types
@@ -101,8 +103,6 @@ export interface ApiError {
   details?: Record<string, string[]>;
 }
 
-
-
 export interface PlantWatering {
   id?: number;
   plant?: number;
@@ -112,4 +112,33 @@ export interface PlantWatering {
   amount_ml: number;
   notes?: string;
   is_completed: boolean;
+}
+
+// Order Types
+export interface Order {
+  id: string;
+  product: string;
+  product_name: string;
+  product_image: string;
+  product_price: number;
+  buyer: string;
+  buyer_name: string;
+  buyer_email: string;
+  seller: string;
+  seller_name: string;
+  seller_email: string;
+  quantity: number;
+  total_price: number;
+  status: "pending" | "processing" | "completed" | "cancelled";
+  shipping_address?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderCreateUpdate {
+  product: string;
+  quantity: number;
+  shipping_address?: string;
+  notes?: string;
 }

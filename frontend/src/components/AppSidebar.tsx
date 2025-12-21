@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Package,
   TrendingUp,
+  ShoppingCart,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -35,16 +36,17 @@ const menuSections = [
   {
     title: "Farm Management",
     items: [
-      { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-      { title: 'Plants', url: '/plants', icon: Sprout },
-      { title: 'Plants Watering', url: '/watering', icon: Sprout },
-      { title: 'Crop History', url: '/crop-history', icon: History },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Plants", url: "/plants", icon: Sprout },
+      { title: "Plants Watering", url: "/watering", icon: Sprout },
+      { title: "Crop History", url: "/crop-history", icon: History },
     ],
   },
   {
     title: "Marketplace",
     items: [
       { title: "Products", url: "/products", icon: ShoppingBag },
+      { title: "My Orders", url: "/my-orders", icon: ShoppingCart },
       {
         title: "My Products",
         url: "/my-products",
@@ -78,7 +80,7 @@ export function AppSidebar() {
 
   const filterMenuItems = (items: any[]) => {
     return items.filter((item) => {
-      if (!item.roles) return true; 
+      if (!item.roles) return true;
       return item.roles.includes(user?.role);
     });
   };

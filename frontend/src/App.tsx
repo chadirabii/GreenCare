@@ -18,6 +18,8 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import MyProducts from "./pages/MyProducts";
 import MySales from "./pages/MySales";
+import MyOrders from "./pages/MyOrders";
+import Checkout from "./pages/Checkout";
 import CropHistory from "./pages/CropHistory";
 import Irrigation from "./pages/Irrigation";
 import DiseaseDetection from "./pages/DiseaseDetection";
@@ -70,7 +72,7 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/watering"
           element={
             <ProtectedRoute>
@@ -95,6 +97,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/my-products"
           element={
             <ProtectedRoute>
@@ -111,6 +121,14 @@ const AppContent = () => {
               <RoleBasedRoute allowedRoles={["seller"]}>
                 <MySales />
               </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            <ProtectedRoute>
+              <MyOrders />
             </ProtectedRoute>
           }
         />
@@ -138,7 +156,14 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/history/:id" element={<ProtectedRoute><HistoryDetails /></ProtectedRoute>} />
+        <Route
+          path="/history/:id"
+          element={
+            <ProtectedRoute>
+              <HistoryDetails />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/profile"
           element={

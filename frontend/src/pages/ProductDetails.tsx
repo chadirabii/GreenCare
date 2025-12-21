@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -40,6 +51,8 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -105,9 +118,55 @@ const ProductDetails = () => {
   };
 
   const handlePurchase = () => {
-    toast({
-      title: "Purchase feature coming soon!",
-      description: "This feature is currently under development.",
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to purchase products.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (product && product.stock_quantity === 0) {
+      toast({
+        title: "Out of stock",
+        description: "This product is currently out of stock.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPurchaseOpen(true);
+  };
+
+  const handleConfirmPurchase = () => {
+    if (!product || !id) return;
+
+    if (quantity < 1) {
+      toast({
+        title: "Invalid quantity",
+        description: "Please enter a valid quantity.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (quantity > product.stock_quantity) {
+      toast({
+        title: "Insufficient stock",
+        description: `Only ${product.stock_quantity} items available.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Navigate to checkout page with product and quantity
+    navigate("/checkout", {
+      state: {
+        productId: id,
+        quantity: quantity,
+      },
     });
   };
 
@@ -246,9 +305,19 @@ const ProductDetails = () => {
                     </span>
                     <span className="text-muted-foreground">USD</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
-                    <Check className="h-4 w-4" />
-                    <span>In Stock</span>
+                  <div className="mt-2 flex items-center gap-2 text-sm">
+                    {product.stock_quantity > 0 ? (
+                      <>
+                        <Check className="h-4 w-4 text-green-600" />
+                        <span className="text-green-600">
+                          {product.stock_quantity} in Stock
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-red-600">Out of Stock</span>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -259,9 +328,10 @@ const ProductDetails = () => {
                   size="lg"
                   className="w-full gap-2 text-lg h-14"
                   onClick={handlePurchase}
+                  disabled={product.stock_quantity === 0}
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  Purchase Now
+                  {product.stock_quantity > 0 ? "Purchase Now" : "Out of Stock"}
                 </Button>
               )}
 
@@ -404,6 +474,54 @@ const ProductDetails = () => {
         onConfirm={handleDeleteConfirm}
         productName={product.name}
       />
+
+      {/* Purchase Dialog */}
+      <Dialog open={isPurchaseOpen} onOpenChange={setIsPurchaseOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Select Quantity</DialogTitle>
+            <DialogDescription>
+              Choose how many items you'd like to purchase
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                max={product.stock_quantity}
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Available: {product.stock_quantity} items
+              </p>
+            </div>
+            <div className="border-t pt-4">
+              <div className="flex justify-between text-lg font-semibold">
+                <span>Subtotal:</span>
+                <span className="text-primary">
+                  ${(product.price * quantity).toFixed(2)}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Shipping and taxes will be calculated at checkout
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPurchaseOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPurchase}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Proceed to Checkout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };

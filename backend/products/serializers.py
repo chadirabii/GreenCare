@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, ProductImage
+from .models import Product, ProductImage, Order
 from authentication.models import CustomUser
 
 
@@ -26,7 +26,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'description', 'price', 'category', 'image',
-                  'images', 'image_urls', 'owner', 'owner_name', 'owner_email',
+                  'images', 'image_urls', 'stock_quantity', 'owner', 'owner_name', 'owner_email',
                   'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at', 'images']
 
@@ -78,3 +78,67 @@ class ProductSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_image = serializers.CharField(
+        source='product.image', read_only=True)
+    product_price = serializers.DecimalField(
+        source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    buyer_name = serializers.SerializerMethodField()
+    buyer_email = serializers.CharField(source='buyer.email', read_only=True)
+    seller_name = serializers.SerializerMethodField()
+    seller_email = serializers.CharField(source='seller.email', read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'product', 'product_name', 'product_image', 'product_price',
+            'buyer', 'buyer_name', 'buyer_email',
+            'seller', 'seller_name', 'seller_email',
+            'quantity', 'total_price', 'status',
+            'shipping_address', 'notes',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'buyer', 'seller',
+                            'total_price', 'created_at', 'updated_at']
+
+    def get_buyer_name(self, obj):
+        if not obj.buyer:
+            return "Anonymous"
+        return f"{obj.buyer.first_name} {obj.buyer.last_name}" if obj.buyer.first_name else obj.buyer.email
+
+    def get_seller_name(self, obj):
+        if not obj.seller:
+            return "Anonymous"
+        return f"{obj.seller.first_name} {obj.seller.last_name}" if obj.seller.first_name else obj.seller.email
+
+    def validate(self, data):
+        product = data.get('product')
+        quantity = data.get('quantity', 1)
+
+        # Check if product has enough stock
+        if product.stock_quantity < quantity:
+            raise serializers.ValidationError({
+                'quantity': f'Only {product.stock_quantity} items available in stock'
+            })
+
+        return data
+
+    def create(self, validated_data):
+        product = validated_data['product']
+        quantity = validated_data.get('quantity', 1)
+
+        # Set seller and calculate total price
+        validated_data['seller'] = product.owner
+        validated_data['total_price'] = product.price * quantity
+
+        # Create order
+        order = Order.objects.create(**validated_data)
+
+        # Reduce stock
+        product.stock_quantity -= quantity
+        product.save()
+
+        return order
