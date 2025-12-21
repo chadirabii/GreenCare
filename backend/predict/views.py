@@ -36,10 +36,21 @@ with open(CLASS_PATH, "r") as f:
     CLASSES = json.load(f)
 
 # === Groq Client ===
-groq_client = OpenAI(
-    api_key=os.environ.get("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
-)
+# Initialize Groq client if API key is available
+groq_client = None
+try:
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if groq_api_key:
+        groq_client = OpenAI(
+            api_key=groq_api_key,
+            base_url="https://api.groq.com/openai/v1"
+        )
+    else:
+        print("Warning: GROQ_API_KEY not set. AI recommendations will be disabled.")
+except Exception as e:
+    print(f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
+    groq_client = None
+
 
 class DetectionResultViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -173,10 +184,6 @@ class DetectionResultViewSet(viewsets.ViewSet):
 
                     if not recommendations:
                         recommendations = ["Failed to get recommendations from AI."]
-                except Exception as e:
-                    print("Groq API error:", e)
-                    traceback.print_exc()
-                    recommendations = ["Failed to get recommendations from AI."]
 
             # -----------------------------
             # 5) Save to DB

@@ -24,3 +24,5 @@ force_redeploy: true
 project_deployments:
   - backend-deployment
   - frontend-deployment
+  - prometheus-deployment
+  - grafana-deployment

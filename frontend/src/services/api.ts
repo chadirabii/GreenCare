@@ -4,8 +4,22 @@ import axios, { AxiosInstance, AxiosError } from "axios";
 // API Client Setup
 // ==========================================
 
+/**
+ * Get API base URL from environment variables
+ * Falls back to localhost if not set
+ */
+const getApiBaseUrl = (): string => {
+  // Check Vite environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Fallback to localhost for development
+  return "http://localhost:8000/api";
+};
+
 const api: AxiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
