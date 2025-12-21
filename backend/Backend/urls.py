@@ -21,14 +21,12 @@ import authentication
 from django.conf import settings
 
 
-
-
 urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/plants/', include('plants.urls')),
     path('api/products/', include('products.urls')),
     path('api/watering/', include('plant_watering.urls')),
-    path('api/predict/', include('predict.urls')),  # Always include predict URLs
+    path('api/predict/', include('predict.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

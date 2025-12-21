@@ -35,19 +35,23 @@ from .models import DetectionResult
 from .serializers import DetectionResultSerializer
 
 # === Paths to model and classes ===
-MODEL_PATH = os.path.join(settings.BASE_DIR, "predict", "trainedModel", "plant_disease_prediction_model.h5")
-CLASS_PATH = os.path.join(settings.BASE_DIR, "predict", "trainedModel", "classes.json")
+MODEL_PATH = os.path.join(settings.BASE_DIR, "predict",
+                          "trainedModel", "plant_disease_prediction_model.h5")
+CLASS_PATH = os.path.join(settings.BASE_DIR, "predict",
+                          "trainedModel", "classes.json")
 
 model = None
+
 
 def get_model():
     if not TENSORFLOW_AVAILABLE:
         raise ImportError("TensorFlow is not installed. Cannot load model.")
-    
+
     global model
     if model is None:
         model = tf.keras.models.load_model(MODEL_PATH)
     return model
+
 
 # === Load classes ===
 with open(CLASS_PATH, "r") as f:
@@ -67,7 +71,8 @@ if OPENAI_AVAILABLE:
         else:
             print("Warning: GROQ_API_KEY not set. AI recommendations will be disabled.")
     except Exception as e:
-        print(f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
+        print(
+            f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
         groq_client = None
 else:
     print("Warning: openai package not available. AI recommendations will be disabled.")
@@ -83,7 +88,8 @@ class DetectionResultViewSet(viewsets.ViewSet):
     def history(self, request):
         user = request.user
         try:
-            detections = DetectionResult.objects.filter(user=user).order_by("-created_at")
+            detections = DetectionResult.objects.filter(
+                user=user).order_by("-created_at")
             serializer = DetectionResultSerializer(detections, many=True)
             return Response(serializer.data)
         except Exception as e:
@@ -112,7 +118,8 @@ class DetectionResultViewSet(viewsets.ViewSet):
         recommendations = detection.recommendations or []
         if not isinstance(recommendations, list):
             # If it's a string, split by newline or bullet
-            recommendations = [r.strip("• ").strip() for r in detection.recommendations.split("\n") if r.strip()]
+            recommendations = [r.strip("• ").strip(
+            ) for r in detection.recommendations.split("\n") if r.strip()]
 
         data = DetectionResultSerializer(detection).data
         data['recommendations'] = recommendations  # overwrite with parsed list
@@ -132,7 +139,7 @@ class DetectionResultViewSet(viewsets.ViewSet):
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
-        
+
         user = request.user
         img_file = request.FILES.get("image")
 
@@ -219,13 +226,16 @@ class DetectionResultViewSet(viewsets.ViewSet):
                                     recommendations.append(line)
 
                     if not recommendations:
-                        recommendations = ["Failed to get recommendations from AI."]
+                        recommendations = [
+                            "Failed to get recommendations from AI."]
                 except Exception as groq_error:
                     print(f"Groq API error: {groq_error}")
                     traceback.print_exc()
-                    recommendations = ["Could not generate AI recommendations at this time."]
+                    recommendations = [
+                        "Could not generate AI recommendations at this time."]
             elif status_label == "diseased" and not groq_client:
-                recommendations = ["AI recommendations unavailable. Please configure GROQ_API_KEY."]
+                recommendations = [
+                    "AI recommendations unavailable. Please configure GROQ_API_KEY."]
 
             # -----------------------------
             # 5) Save to DB
