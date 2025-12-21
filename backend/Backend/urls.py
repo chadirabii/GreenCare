@@ -28,17 +28,8 @@ urlpatterns = [
     path('api/plants/', include('plants.urls')),
     path('api/products/', include('products.urls')),
     path('api/watering/', include('plant_watering.urls')),
+    path('api/predict/', include('predict.urls')),  # Always include predict URLs
 ]
-
-# Conditionally include predict URLs only if TensorFlow is available
-# This allows CI/CD to run tests without TensorFlow dependency
-try:
-    import tensorflow
-    urlpatterns.append(path('api/predict/', include('predict.urls')))
-except ImportError:
-    # TensorFlow not available - skip predict URLs
-    # This is expected in CI/CD environments
-    pass
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

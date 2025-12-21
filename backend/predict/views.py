@@ -9,12 +9,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 import cloudinary.uploader
-import tensorflow as tf
-import numpy as np
 from PIL import Image
-from tensorflow.keras.preprocessing import image as keras_image
 
-from openai import OpenAI
+# Try to import TensorFlow - fail gracefully if not available
+try:
+    import tensorflow as tf
+    import numpy as np
+    from tensorflow.keras.preprocessing import image as keras_image
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    TENSORFLOW_AVAILABLE = False
+    print("Warning: TensorFlow not installed. Disease detection will be unavailable.")
+    print("Install with: pip install tensorflow")
+
+# Try to import OpenAI - fail gracefully if not available
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    print("Warning: openai package not installed. AI recommendations will be unavailable.")
+    print("Install with: pip install openai")
 
 from .models import DetectionResult
 from .serializers import DetectionResultSerializer
@@ -26,6 +41,9 @@ CLASS_PATH = os.path.join(settings.BASE_DIR, "predict", "trainedModel", "classes
 model = None
 
 def get_model():
+    if not TENSORFLOW_AVAILABLE:
+        raise ImportError("TensorFlow is not installed. Cannot load model.")
+    
     global model
     if model is None:
         model = tf.keras.models.load_model(MODEL_PATH)
@@ -36,20 +54,23 @@ with open(CLASS_PATH, "r") as f:
     CLASSES = json.load(f)
 
 # === Groq Client ===
-# Initialize Groq client if API key is available
+# Initialize Groq client if API key is available and openai package is installed
 groq_client = None
-try:
-    groq_api_key = os.environ.get("GROQ_API_KEY")
-    if groq_api_key:
-        groq_client = OpenAI(
-            api_key=groq_api_key,
-            base_url="https://api.groq.com/openai/v1"
-        )
-    else:
-        print("Warning: GROQ_API_KEY not set. AI recommendations will be disabled.")
-except Exception as e:
-    print(f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
-    groq_client = None
+if OPENAI_AVAILABLE:
+    try:
+        groq_api_key = os.environ.get("GROQ_API_KEY")
+        if groq_api_key:
+            groq_client = OpenAI(
+                api_key=groq_api_key,
+                base_url="https://api.groq.com/openai/v1"
+            )
+        else:
+            print("Warning: GROQ_API_KEY not set. AI recommendations will be disabled.")
+    except Exception as e:
+        print(f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
+        groq_client = None
+else:
+    print("Warning: openai package not available. AI recommendations will be disabled.")
 
 
 class DetectionResultViewSet(viewsets.ViewSet):
@@ -102,6 +123,16 @@ class DetectionResultViewSet(viewsets.ViewSet):
     # -----------------------------
     @action(detail=False, methods=["post"])
     def predict(self, request):
+        # Check if TensorFlow is available
+        if not TENSORFLOW_AVAILABLE:
+            return Response(
+                {
+                    "error": "TensorFlow is not installed. Disease detection is unavailable.",
+                    "details": "Please install TensorFlow: pip install tensorflow"
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
         user = request.user
         img_file = request.FILES.get("image")
 
@@ -144,8 +175,8 @@ class DetectionResultViewSet(viewsets.ViewSet):
             recommendations = []
             groq_raw_response_str = None
 
-            if status_label == "diseased":
-                prompt = prompt = f"""
+            if status_label == "diseased" and groq_client:
+                prompt = f"""
     You are an expert plant pathologist.
 
     The detected plant disease is: **{disease_name}**.
@@ -162,31 +193,39 @@ class DetectionResultViewSet(viewsets.ViewSet):
     """
 
                 try:
-                    groq_response = groq_client.responses.create(
+                    groq_response = groq_client.chat.completions.create(
                         model="llama-3.3-70b-versatile",
-                        input=prompt
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ],
+                        temperature=0.7,
+                        max_tokens=1024
                     )
 
                     # Log raw response for debugging
                     print("Groq raw response:", groq_response)
                     groq_raw_response_str = str(groq_response)
 
-                    # Extract text safely
-                    if hasattr(groq_response, "output") and groq_response.output:
-                        for item in groq_response.output:
-                            if hasattr(item, "content") and item.content:
-                                for c in item.content:
-                                    if hasattr(c, "text") and c.text:
-                                        for line in c.text.split("\n"):
-                                            line = line.strip()
-                                            if line:
-                                                recommendations.append(line)
+                    # Extract text from response
+                    if groq_response.choices and len(groq_response.choices) > 0:
+                        content = groq_response.choices[0].message.content
+                        if content:
+                            for line in content.split("\n"):
+                                line = line.strip()
+                                if line:
+                                    recommendations.append(line)
 
                     if not recommendations:
                         recommendations = ["Failed to get recommendations from AI."]
                 except Exception as groq_error:
                     print(f"Groq API error: {groq_error}")
+                    traceback.print_exc()
                     recommendations = ["Could not generate AI recommendations at this time."]
+            elif status_label == "diseased" and not groq_client:
+                recommendations = ["AI recommendations unavailable. Please configure GROQ_API_KEY."]
 
             # -----------------------------
             # 5) Save to DB
