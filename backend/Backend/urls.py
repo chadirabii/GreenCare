@@ -43,3 +43,6 @@ except ImportError:
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Prometheus metrics endpoint
+urlpatterns.append(path('', include('django_prometheus.urls')))
+

@@ -11,10 +11,15 @@ spec:
     metadata:
       labels:
         app: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
-      - name: backend
-        image: my-django-app
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8000
+        - name: backend
+          image: my-django-app
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http

@@ -36,10 +36,21 @@ with open(CLASS_PATH, "r") as f:
     CLASSES = json.load(f)
 
 # === Groq Client ===
-groq_client = OpenAI(
-    api_key=os.environ.get("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
-)
+# Initialize Groq client if API key is available
+groq_client = None
+try:
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    if groq_api_key:
+        groq_client = OpenAI(
+            api_key=groq_api_key,
+            base_url="https://api.groq.com/openai/v1"
+        )
+    else:
+        print("Warning: GROQ_API_KEY not set. AI recommendations will be disabled.")
+except Exception as e:
+    print(f"Warning: Could not initialize Groq client: {e}. AI recommendations will be disabled.")
+    groq_client = None
+
 
 class DetectionResultViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -134,35 +145,38 @@ class DetectionResultViewSet(viewsets.ViewSet):
             groq_raw_response_str = None
 
             if status_label == "diseased":
-                prompt = f"Give clear, short treatment steps for this plant disease: {disease_name}."
+                if groq_client is None:
+                    recommendations = ["AI recommendations unavailable (API key not configured)."]
+                else:
+                    prompt = f"Give clear, short treatment steps for this plant disease: {disease_name}."
 
-                try:
-                    groq_response = groq_client.responses.create(
-                        model="llama-3.3-70b-versatile",
-                        input=prompt
-                    )
+                    try:
+                        groq_response = groq_client.responses.create(
+                            model="llama-3.3-70b-versatile",
+                            input=prompt
+                        )
 
-                    # Log raw response for debugging
-                    print("Groq raw response:", groq_response)
-                    groq_raw_response_str = str(groq_response)
+                        # Log raw response for debugging
+                        print("Groq raw response:", groq_response)
+                        groq_raw_response_str = str(groq_response)
 
-                    # Extract text safely
-                    if hasattr(groq_response, "output") and groq_response.output:
-                        for item in groq_response.output:
-                            if hasattr(item, "content") and item.content:
-                                for c in item.content:
-                                    if hasattr(c, "text") and c.text:
-                                        for line in c.text.split("\n"):
-                                            line = line.strip()
-                                            if line:
-                                                recommendations.append(line)
+                        # Extract text safely
+                        if hasattr(groq_response, "output") and groq_response.output:
+                            for item in groq_response.output:
+                                if hasattr(item, "content") and item.content:
+                                    for c in item.content:
+                                        if hasattr(c, "text") and c.text:
+                                            for line in c.text.split("\n"):
+                                                line = line.strip()
+                                                if line:
+                                                    recommendations.append(line)
 
-                    if not recommendations:
+                        if not recommendations:
+                            recommendations = ["Failed to get recommendations from AI."]
+                    except Exception as e:
+                        print("Groq API error:", e)
+                        traceback.print_exc()
                         recommendations = ["Failed to get recommendations from AI."]
-                except Exception as e:
-                    print("Groq API error:", e)
-                    traceback.print_exc()
-                    recommendations = ["Failed to get recommendations from AI."]
 
             # -----------------------------
             # 5) Save to DB
