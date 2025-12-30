@@ -159,7 +159,7 @@ const Products = () => {
                       </p>
                       <div className="flex items-center justify-between pt-2">
                         <span className="text-xl font-bold text-primary">
-                          ${product.price}
+                          {product.price} TND
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {product.owner_name}

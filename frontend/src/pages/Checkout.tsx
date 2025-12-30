@@ -484,7 +484,7 @@ const Checkout = () => {
                         Quantity: {state?.quantity}
                       </p>
                       <p className="text-sm font-medium">
-                        ${Number(product.price).toFixed(2)} each
+                        {Number(product.price).toFixed(2)} TND each
                       </p>
                     </div>
                   </div>

@@ -196,7 +196,7 @@ const MyProducts = () => {
                           </p>
                         </div>
                         <span className="text-xl font-bold text-primary whitespace-nowrap">
-                          ${product.price}
+                          {product.price} TND
                         </span>
                       </div>
 

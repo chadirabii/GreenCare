@@ -35,14 +35,14 @@ const Watering = () => {
   const [waterings, setWaterings] = useState<PlantWatering[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [plants, setPlants] = useState([]); 
+  const [plants, setPlants] = useState([]);
   const [editingWatering, setEditingWatering] = useState<PlantWatering | null>(
     null
   );
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<PlantWatering>>({
     plant: undefined,
-    plant_name: "", 
+    plant_name: "",
     watering_date: "",
     next_watering_date: "",
     amount_ml: 0,
@@ -177,7 +177,10 @@ const Watering = () => {
                     id="plant"
                     value={formData.plant ?? ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, plant: Number(e.target.value) })
+                      setFormData({
+                        ...formData,
+                        plant: Number(e.target.value),
+                      })
                     }
                     required
                   >
@@ -205,7 +208,7 @@ const Watering = () => {
                     required
                   />
                 </div>
-                <div>
+                {/* <div>
                   <Label htmlFor="next_watering_date">Next Watering Date</Label>
                   <Input
                     id="next_watering_date"
@@ -218,7 +221,7 @@ const Watering = () => {
                       })
                     }
                   />
-                </div>
+                </div> */}
                 <div>
                   <Label htmlFor="amount_ml">Amount (ml)</Label>
                   <Input

@@ -301,9 +301,9 @@ const ProductDetails = () => {
                 <CardContent className="p-6">
                   <div className="flex items-baseline gap-2">
                     <span className="text-5xl font-bold text-primary">
-                      ${product.price}
+                      {product.price} TND
                     </span>
-                    <span className="text-muted-foreground">USD</span>
+                    <span className="text-muted-foreground">TND</span>
                   </div>
                   <div className="mt-2 flex items-center gap-2 text-sm">
                     {product.stock_quantity > 0 ? (
@@ -503,7 +503,7 @@ const ProductDetails = () => {
               <div className="flex justify-between text-lg font-semibold">
                 <span>Subtotal:</span>
                 <span className="text-primary">
-                  ${(product.price * quantity).toFixed(2)}
+                  {(product.price * quantity).toFixed(2)} TND
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">

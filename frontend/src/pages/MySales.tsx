@@ -208,7 +208,7 @@ const MySales = () => {
                             </p>
                           </div>
                           <span className="text-lg font-bold text-primary">
-                            ${Number(sale.total_price).toFixed(2)}
+                            {Number(sale.total_price).toFixed(2)} TND
                           </span>
                         </div>
 
