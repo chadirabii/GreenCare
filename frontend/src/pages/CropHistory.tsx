@@ -180,8 +180,7 @@ const CropHistory = () => {
         ];
 
       // Calculate predicted yield
-      const baseYield =
-        baseYields[randomCrop.cropName] || baseYields.default;
+      const baseYield = baseYields[randomCrop.cropName] || baseYields.default;
       const predictedAmount = Math.round(baseYield * predictionData.multiplier);
       const variance = Math.round(predictedAmount * 0.1);
 
@@ -189,11 +188,11 @@ const CropHistory = () => {
       const today = new Date();
       const plantedDate = new Date(randomCrop.plantedDate);
       const daysToHarvest = 30 + Math.floor(Math.random() * 21); // 30-50 days
-      
+
       // Calculate from planting date
       let expectedHarvest = new Date(plantedDate);
       expectedHarvest.setDate(plantedDate.getDate() + daysToHarvest);
-      
+
       // If the calculated date is in the past, calculate from today instead
       if (expectedHarvest < today) {
         const remainingDays = 30 + Math.floor(Math.random() * 21); // 30-50 days from now
@@ -205,7 +204,9 @@ const CropHistory = () => {
 
       setPrediction({
         crop: randomCrop,
-        predictedYield: `${predictedAmount - variance}-${predictedAmount + variance} kg`,
+        predictedYield: `${predictedAmount - variance}-${
+          predictedAmount + variance
+        } kg`,
         confidence:
           confidenceLevels[Math.floor(Math.random() * confidenceLevels.length)],
         factors: predictionData.factors,
@@ -217,7 +218,9 @@ const CropHistory = () => {
 
       toast({
         title: "Yield Prediction Complete!",
-        description: `Predicted yield for ${randomCrop.cropName}: ${predictedAmount - variance}-${predictedAmount + variance} kg`,
+        description: `Predicted yield for ${randomCrop.cropName}: ${
+          predictedAmount - variance
+        }-${predictedAmount + variance} kg`,
       });
     }, 2000);
   };
@@ -370,7 +373,9 @@ const CropHistory = () => {
                 <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
                   💡 Analysis
                 </p>
-                <p className="text-sm leading-relaxed mb-3">{prediction.message}</p>
+                <p className="text-sm leading-relaxed mb-3">
+                  {prediction.message}
+                </p>
                 <div className="mt-3 space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase">
                     Key Factors:
@@ -378,7 +383,9 @@ const CropHistory = () => {
                   <ul className="space-y-1">
                     {prediction.factors.map((factor, idx) => (
                       <li key={idx} className="text-sm flex items-start gap-2">
-                        <span className="text-green-600 dark:text-green-400">✓</span>
+                        <span className="text-green-600 dark:text-green-400">
+                          ✓
+                        </span>
                         <span>{factor}</span>
                       </li>
                     ))}
@@ -444,7 +451,8 @@ const CropHistory = () => {
                     setShowPrediction(false);
                     toast({
                       title: "Yield Updated",
-                      description: "Predicted yield has been added to the record.",
+                      description:
+                        "Predicted yield has been added to the record.",
                     });
                   }}
                   className="flex-1"
